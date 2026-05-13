@@ -1,11 +1,11 @@
-@extends('layouts.app')
-
-@section('content')
-    @include('components.hero')
-    @include('components.stats')
-    @include('components.about')
-    @include('components.pricing')
-    @include('components.trainers')
-    @include('components.booking')
-    @include('components.cta')
-@endsection
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>hello world</h1>
+</body>
+</html>
