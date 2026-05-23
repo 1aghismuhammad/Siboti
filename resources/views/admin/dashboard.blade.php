@@ -28,9 +28,9 @@
                 <span class="material-symbols-outlined">card_membership</span>
                 <span>Paket Keanggotaan</span>
             </a>
-            <a href="#" class="admin-menu__item">
+            <a href="{{ route('trainer.dashboard') }}" class="admin-menu__item">
                 <span class="material-symbols-outlined">fitness_center</span>
-                <span>Pelatih</span>
+                <span>Personal Trainer</span>
             </a>
             <a href="#" class="admin-menu__item">
                 <span class="material-symbols-outlined">event_available</span>
@@ -40,7 +40,7 @@
                 <span class="material-symbols-outlined">qr_code_scanner</span>
                 <span>Receptionist</span>
             </a>
-            <a href="#" class="admin-menu__item">
+            <a href="{{ route('pos.dashboard') }}" class="admin-menu__item">
                 <span class="material-symbols-outlined">point_of_sale</span>
                 <span>Transaksi POS</span>
             </a>
@@ -246,14 +246,14 @@
                     <strong>Dashboard Receptionist</strong>
                     <i class="material-symbols-outlined">chevron_right</i>
                 </a>
-                <a href="#" class="admin-quick-action">
-                    <span class="material-symbols-outlined">local_activity</span>
-                    <strong>Kelola Paket</strong>
+                <a href="{{ route('pos.dashboard') }}" class="admin-quick-action">
+                    <span class="material-symbols-outlined">point_of_sale</span>
+                    <strong>Dashboard POS</strong>
                     <i class="material-symbols-outlined">chevron_right</i>
                 </a>
-                <a href="#" class="admin-quick-action">
+                <a href="{{ route('trainer.dashboard') }}" class="admin-quick-action">
                     <span class="material-symbols-outlined">sports</span>
-                    <strong>Kelola Trainer</strong>
+                    <strong>Dashboard Personal Trainer</strong>
                     <i class="material-symbols-outlined">chevron_right</i>
                 </a>
                 <a href="#" class="admin-quick-action">

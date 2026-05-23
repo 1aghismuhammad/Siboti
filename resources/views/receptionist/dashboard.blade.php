@@ -24,6 +24,10 @@
                 <span class="material-symbols-outlined">dashboard</span>
                 <span>Dashboard</span>
             </a>
+            <a href="{{ route('trainer.dashboard') }}" class="admin-menu__item">
+                <span class="material-symbols-outlined">fitness_center</span>
+                <span>Personal Trainer</span>
+            </a>
             <a href="#scan-qr" class="admin-menu__item">
                 <span class="material-symbols-outlined">qr_code_scanner</span>
                 <span>Scan QR</span>
@@ -32,7 +36,7 @@
                 <span class="material-symbols-outlined">history</span>
                 <span>Riwayat Check-in</span>
             </a>
-            <a href="#transaksi-pos" class="admin-menu__item">
+            <a href="{{ route('pos.dashboard') }}" class="admin-menu__item">
                 <span class="material-symbols-outlined">point_of_sale</span>
                 <span>POS</span>
             </a>
