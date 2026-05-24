@@ -21,8 +21,12 @@
                 <span>Admin Dashboard</span>
             </a>
             <a href="{{ route('receptionist.dashboard') }}" class="admin-menu__item">
-                <span class="material-symbols-outlined">qr_code_scanner</span>
+                <span class="material-symbols-outlined">support_agent</span>
                 <span>Receptionist</span>
+            </a>
+            <a href="{{ route('scan-qr.index') }}" class="admin-menu__item">
+                <span class="material-symbols-outlined">qr_code_scanner</span>
+                <span>Scan QR</span>
             </a>
             <a href="{{ route('trainer.dashboard') }}" class="admin-menu__item">
                 <span class="material-symbols-outlined">fitness_center</span>
@@ -43,6 +47,10 @@
             <a href="#transaksi-pos" class="admin-menu__item">
                 <span class="material-symbols-outlined">receipt_long</span>
                 <span>Transaksi</span>
+            </a>
+            <a href="{{ route('reports.index') }}" class="admin-menu__item">
+                <span class="material-symbols-outlined">bar_chart</span>
+                <span>Laporan</span>
             </a>
         </nav>
 

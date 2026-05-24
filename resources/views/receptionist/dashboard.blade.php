@@ -28,7 +28,7 @@
                 <span class="material-symbols-outlined">fitness_center</span>
                 <span>Personal Trainer</span>
             </a>
-            <a href="#scan-qr" class="admin-menu__item">
+            <a href="{{ route('scan-qr.index') }}" class="admin-menu__item">
                 <span class="material-symbols-outlined">qr_code_scanner</span>
                 <span>Scan QR</span>
             </a>
@@ -43,6 +43,10 @@
             <a href="#transaksi-pos" class="admin-menu__item">
                 <span class="material-symbols-outlined">receipt_long</span>
                 <span>Transaksi</span>
+            </a>
+            <a href="{{ route('reports.index') }}" class="admin-menu__item">
+                <span class="material-symbols-outlined">bar_chart</span>
+                <span>Laporan</span>
             </a>
             <a href="#scan-qr" class="admin-menu__item">
                 <span class="material-symbols-outlined">person_search</span>
@@ -91,7 +95,7 @@
                     <h2>Selamat Datang, Receptionist</h2>
                     <p>Kelola check-in member, validasi status membership, dan transaksi POS harian melalui satu dashboard operasional.</p>
                 </div>
-                <a href="#scan-qr" class="admin-primary-button receptionist-hero__button">
+                <a href="{{ route('scan-qr.index') }}" class="admin-primary-button receptionist-hero__button">
                     <span class="material-symbols-outlined">qr_code_scanner</span>
                     Scan QR Sekarang
                 </a>

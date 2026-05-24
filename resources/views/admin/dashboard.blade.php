@@ -37,14 +37,18 @@
                 <span>Booking</span>
             </a>
             <a href="{{ route('receptionist.dashboard') }}" class="admin-menu__item">
-                <span class="material-symbols-outlined">qr_code_scanner</span>
+                <span class="material-symbols-outlined">support_agent</span>
                 <span>Receptionist</span>
+            </a>
+            <a href="{{ route('scan-qr.index') }}" class="admin-menu__item">
+                <span class="material-symbols-outlined">qr_code_scanner</span>
+                <span>Scan QR</span>
             </a>
             <a href="{{ route('pos.dashboard') }}" class="admin-menu__item">
                 <span class="material-symbols-outlined">point_of_sale</span>
                 <span>Transaksi POS</span>
             </a>
-            <a href="#" class="admin-menu__item">
+            <a href="{{ route('reports.index') }}" class="admin-menu__item">
                 <span class="material-symbols-outlined">bar_chart</span>
                 <span>Laporan</span>
             </a>
@@ -242,8 +246,13 @@
 
             <section class="admin-quick-actions" aria-label="Aksi cepat admin">
                 <a href="{{ route('receptionist.dashboard') }}" class="admin-quick-action">
-                    <span class="material-symbols-outlined">qr_code_scanner</span>
+                    <span class="material-symbols-outlined">support_agent</span>
                     <strong>Dashboard Receptionist</strong>
+                    <i class="material-symbols-outlined">chevron_right</i>
+                </a>
+                <a href="{{ route('scan-qr.index') }}" class="admin-quick-action">
+                    <span class="material-symbols-outlined">qr_code_scanner</span>
+                    <strong>Scan QR Check-in</strong>
                     <i class="material-symbols-outlined">chevron_right</i>
                 </a>
                 <a href="{{ route('pos.dashboard') }}" class="admin-quick-action">
@@ -256,9 +265,9 @@
                     <strong>Dashboard Personal Trainer</strong>
                     <i class="material-symbols-outlined">chevron_right</i>
                 </a>
-                <a href="#" class="admin-quick-action">
+                <a href="{{ route('reports.index') }}" class="admin-quick-action">
                     <span class="material-symbols-outlined">insert_chart</span>
-                    <strong>Laporan</strong>
+                    <strong>Laporan Operasional</strong>
                     <i class="material-symbols-outlined">chevron_right</i>
                 </a>
             </section>

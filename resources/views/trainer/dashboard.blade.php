@@ -48,6 +48,10 @@
                 <span class="material-symbols-outlined">history</span>
                 <span>Riwayat Progres</span>
             </a>
+            <a href="{{ route('reports.index') }}" class="admin-menu__item">
+                <span class="material-symbols-outlined">bar_chart</span>
+                <span>Laporan</span>
+            </a>
         </nav>
 
         <div class="admin-sidebar__footer">
