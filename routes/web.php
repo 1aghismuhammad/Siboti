@@ -34,6 +34,12 @@ Route::middleware(['auth'])->group(function () {
         return view('admin.dashboard');
     });
 
+    // Admin - users management (basic index)
+    Route::get('/admin/users', function () {
+        $users = \App\Models\User::latest()->limit(50)->get();
+        return view('admin.users.index', compact('users'));
+    })->name('admin.users.index');
+
     Route::get('/member/dashboard', function () {
         return view('member.dashboard');
     });

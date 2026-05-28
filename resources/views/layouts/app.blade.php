@@ -1,36 +1,60 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
-
-        <title>{{ config('app.name', 'Laravel') }}</title>
-
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-
-        <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    </head>
-    <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100">
-            @include('layouts.navigation')
-
-            <!-- Page Heading -->
-            @hasSection('header')
-                <header class="bg-white shadow">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        @yield('header')
-                    </div>
-                </header>
-            @endif
-
-            <!-- Page Content -->
-            <main>
-                @yield('content')
-            </main>
-        </div>
-    </body>
+<html lang="id" itemscope itemtype="https://schema.org/LocalBusiness">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Siboti - Gym Premium Semarang | Booking Online</title>
+    <meta name="description" content="Siboti adalah gym premium di Semarang dengan trainer bersertifikat, peralatan modern, dan fasilitas lengkap.">
+    <meta name="keywords" content="gym semarang, fitness semarang, personal trainer semarang, membership gym, booking gym online, siboti gym">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://siboti.id/">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Siboti - Gym Premium Semarang">
+    <meta property="og:description" content="Latihan profesional, peralatan modern, dan suasana premium dalam satu tempat.">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1200&q=80">
+    <meta property="og:locale" content="id_ID">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Siboti - Gym Premium Semarang">
+    <meta name="twitter:description" content="Latihan profesional, peralatan modern, dan suasana premium dalam satu tempat.">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "HealthClub",
+        "name": "Siboti Gym Semarang",
+        "description": "Gym premium di Semarang dengan trainer bersertifikat dan peralatan modern.",
+        "url": "https://siboti.id",
+        "telephone": "+628893282932",
+        "email": "rafakurnia@gmail.com",
+        "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Jl. Sudirman No. 10",
+            "addressLocality": "Semarang",
+            "addressRegion": "Jawa Tengah",
+            "addressCountry": "ID"
+        },
+        "openingHoursSpecification": {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+            "opens": "06:00",
+            "closes": "23:00"
+        }
+    }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}?v=1.0">
+    <link rel="stylesheet" href="{{ asset('css/navbar.css') }}?v=1.0">
+    <link rel="stylesheet" href="{{ asset('css/hero.css') }}?v=1.0">
+    <link rel="stylesheet" href="{{ asset('css/components.css') }}?v=1.0">
+    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}?v=1.0">
+</head>
+<body>
+    @include('components.navbar')
+    <main id="main-content">
+        {{ $slot ?? '' }}
+    </main>
+    @include('components.footer')
+</body>
 </html>

@@ -159,7 +159,7 @@ Aplikasi memiliki empat role utama.
 | Member | Registrasi, membership, booking, QR check-in, melihat progres | Dashboard member, membership, booking, QR, progres |
 | Personal Trainer | Mengatur jadwal dan input progres member | Dashboard trainer, jadwal, daftar klien, input progres |
 | Receptionist | Verifikasi QR check-in dan transaksi POS | Dashboard receptionist, scan QR, POS |
-| Admin | Mengelola master data, akun pengguna, laporan | Dashboard admin, paket, user, trainer, laporan |
+|  | Mengelola master data, akun pengguna, laporan | Dashboard admin, paket, user, trainer, laporan |
 
 ### Catatan PM
 
