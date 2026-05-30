@@ -1,0 +1,45 @@
+/* Simple vanilla CSS for admin dashboard (dark theme) */
+:root{
+    --bg-dark: #0a0a0a;
+    --bg-section: #111111;
+    --bg-card: #1a1a1a;
+    --neon: #CCFF00;
+    --white: #ffffff;
+    --muted: rgba(255,255,255,0.6);
+    --muted-2: rgba(255,255,255,0.4);
+    --border: rgba(255,255,255,0.08);
+}
+
+body{ background: var(--bg-dark); color: var(--white); font-family: Inter, system-ui, Arial, sans-serif; }
+#main-content{ padding: 1rem; }
+
+.admin-container{ padding: 1.5rem; }
+
+.stats-grid{ display: grid; grid-template-columns: 1fr; gap: 1rem; }
+@media(min-width:640px){ .stats-grid{ grid-template-columns: repeat(3,1fr); } }
+
+.stat-card{ background: var(--bg-card); padding: 1rem; border-radius: 8px; border: 1px solid var(--border); }
+.stat-title{ font-size: 0.875rem; color: var(--muted); }
+.stat-value{ font-size: 1.5rem; font-weight:700; margin-top:0.25rem; }
+.stat-sub{ font-size: 0.75rem; color: var(--muted-2); }
+
+.card{ background: var(--bg-card); border: 1px solid var(--border); border-radius:8px; overflow:hidden; }
+.card .card-header{ padding:0.75rem 1rem; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+.card .card-body{ padding:1rem; }
+
+.table-wrap{ overflow-x:auto; }
+.table{ width:100%; border-collapse:collapse; }
+.table th, .table td{ padding:0.6rem 0.75rem; text-align:left; }
+.table thead th{ color: var(--muted); font-size:0.9rem; }
+.table tbody tr{ border-top:1px solid rgba(255,255,255,0.03); }
+.table td{ color: var(--white); }
+
+.link-manage{ color: var(--neon); text-decoration:none; }
+.link-manage:hover{ text-decoration:underline; }
+
+/* Utilities */
+.text-muted{ color: var(--muted); }
+.small{ font-size:0.85rem; color:var(--muted-2); }
+
+/* users index spacing */
+.container{ padding:1.5rem; }
