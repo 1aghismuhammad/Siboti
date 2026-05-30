@@ -49,12 +49,22 @@
     <link rel="stylesheet" href="{{ asset('css/hero.css') }}?v=1.0">
     <link rel="stylesheet" href="{{ asset('css/components.css') }}?v=1.0">
     <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}?v=1.0">
+    <link rel="stylesheet" href="{{ asset('css/account.css') }}?v=1.0">
 </head>
 <body>
     @include('components.navbar')
+
+    @isset($header)
+        <header class="page-header">
+            {{ $header }}
+        </header>
+    @endisset
+
     <main id="main-content">
+        @yield('content')
         {{ $slot ?? '' }}
     </main>
+
     @include('components.footer')
 </body>
 </html>

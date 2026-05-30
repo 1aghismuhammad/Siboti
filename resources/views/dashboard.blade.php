@@ -1,27 +1,14 @@
 <x-app-layout>
-
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Dashboard
-        </h2>
+        <h1 class="page-title">Dashboard</h1>
     </x-slot>
 
-    <div class="py-12">
-
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-
-                <div class="p-6 text-gray-900">
-
-                    You're logged in!
-
-                </div>
-
+    <section class="account-page">
+        <div class="account-container">
+            <div class="account-card member-panel">
+                <h2 class="account-heading">Selamat datang</h2>
+                <p class="member-panel__text">You're logged in!</p>
             </div>
-
         </div>
-
-    </div>
-
+    </section>
 </x-app-layout>
