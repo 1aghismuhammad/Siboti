@@ -24,7 +24,14 @@
                     <li class="paket-card__feature"><span class="paket-card__feature-check">✓</span> Free locker & cardio area</li>
                     <li class="paket-card__feature"><span class="paket-card__feature-check">✓</span> 1 sesi konsultasi trainer</li>
                 </ul>
-                <a href="#booking" class="btn-outline" style="display:block;text-align:center;">PILIH PAKET</a>
+                <a 
+                    href="https://wa.me/6281234567890" 
+                    class="btn-outline" 
+                    style="display:block;text-align:center;"
+                    target="_blank">
+                    PILIH PAKET
+                </a>
+                
             </div>
             <div class="paket-card paket-card--featured bulanan tahunan">
                 <div class="paket-card__badge">PALING POPULER</div>
@@ -38,7 +45,14 @@
                     <li class="paket-card__feature"><span class="paket-card__feature-check">✓</span> Akses kelas grup</li>
                     <li class="paket-card__feature"><span class="paket-card__feature-check">✓</span> Body composition analysis</li>
                 </ul>
-                <a href="#booking" class="btn-primary" style="display:block;text-align:center;">PILIH PAKET</a>
+                <a 
+                    href="https://wa.me/6281234567890" 
+                    class="btn-outline" 
+                    style="display:block;text-align:center;"
+                    target="_blank">
+                    PILIH PAKET
+                </a>
+
             </div>
             <div class="paket-card tahunan personal">
                 <p class="paket-card__tier">Elite</p>
@@ -51,7 +65,13 @@
                     <li class="paket-card__feature"><span class="paket-card__feature-check">✓</span> Lounge access VIP</li>
                     <li class="paket-card__feature"><span class="paket-card__feature-check">✓</span> Tamu +1 setiap sesi</li>
                 </ul>
-                <a href="#booking" class="btn-outline" style="display:block;text-align:center;">PILIH PAKET</a>
+                <a 
+                    href="https://wa.me/6281234567890" 
+                    class="btn-outline" 
+                    style="display:block;text-align:center;"
+                    target="_blank">
+                    PILIH PAKET
+                </a>
             </div>
         </div>
     </div>

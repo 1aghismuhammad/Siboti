@@ -122,7 +122,7 @@
 
         
         <div class="navbar-top__actions">
-            <a href="#profil" class="navbar-top__user">
+            <a href="/login" class="navbar-top__user">
                 <img src="Image/Icon/user.webp" alt="User">
             </a>
 

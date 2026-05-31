@@ -27,3 +27,16 @@ Route::get('/hub/qr', function () {
 Route::get('/hub/progress', function () {
     return view('hub.progress');
 });
+
+// Trainer Panel
+Route::get('/trainer/login', function () {
+    return view('crud_pelatih.login');
+});
+
+Route::get('/trainer/register', function () {
+    return view('crud_pelatih.register');
+});
+
+Route::get('/trainer/dashboard', function () {
+    return view('crud_pelatih.dashboard');
+});
