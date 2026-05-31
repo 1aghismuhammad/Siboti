@@ -6,6 +6,5 @@
     @include('components.about')
     @include('components.pricing')
     @include('components.trainers')
-    @include('components.booking')
     @include('components.cta')
 @endsection

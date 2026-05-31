@@ -139,6 +139,12 @@
             Dashboard
         </a>
 
+         <a href="{{ url('/hub/booking') }}"
+            class="hub-nav-item {{ $active === 'booking' ? 'hub-nav-item--active' : '' }}">
+            <img src="{{ asset('image/Icon/booking.webp') }}" alt="Booking">
+            Booking
+        </a>
+
         <a href="{{ url('/hub/qr') }}"
            class="hub-nav-item {{ $active === 'qr' ? 'hub-nav-item--active' : '' }}">
             <img src="{{ asset('image/Icon/qr.webp') }}" alt="QR Check-In">

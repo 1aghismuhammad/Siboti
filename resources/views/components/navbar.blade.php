@@ -117,7 +117,6 @@
             <li><a href="#trainer">Trainer</a></li>
             <li><a href="#paket">Paket</a></li>
             <li><a href="#kontak">Kontak</a></li>
-            <li><a href="{{ url('/hub/dashboard') }}">SibotiHUB</a></li>
         </ul>
 
         
@@ -126,9 +125,7 @@
                 <img src="Image/Icon/user.webp" alt="User">
             </a>
 
-            <a href="#booking" class="navbar-top__cta">
-                BOOKING SEKARANG →
-            </a>
+            <a href="{{ url('/hub/booking') }}" class="btn-primary navbar-top__cta">BOOKING SEKARANG →</a>
         </div>
 
     </div>

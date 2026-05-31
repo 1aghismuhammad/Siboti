@@ -6,7 +6,7 @@
     <div class="cta__content">
         <h2 class="cta__title">SIAP MEMULAI <br><span>PERJALANANMU?</span></h2>
         <p class="cta__desc">Kunjungi Siboti Gym dan rasakan pengalaman latihan premium.</p>
-        <a href="#booking" class="btn-primary">BOOKING SEKARANG JUGA →</a>
+        <a href="{{ url('/hub/booking') }}" class="btn-primary">BOOKING SEKARANG JUGA →</a>
         <div class="cta__meta">
             <span>📍 Jl. Sudirman No. 10, Semarang</span>
             <span>🕐 Senin – Minggu, 06.00 – 23.00</span>

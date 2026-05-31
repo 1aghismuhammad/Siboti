@@ -40,3 +40,7 @@ Route::get('/trainer/register', function () {
 Route::get('/trainer/dashboard', function () {
     return view('crud_pelatih.dashboard');
 });
+
+Route::get('/hub/booking', function () {
+    return view('hub.booking');
+});
