@@ -27,12 +27,26 @@
     <div class="hub-main__header">
         <div>
             <p class="hub-main__greeting">Selamat datang kembali</p>
-            <h1 class="hub-main__title">Halo, Budi. 👋</h1>
+            @auth
+                <h1 class="hub-main__title">Halo, {{ auth()->user()->name }}. 👋</h1>
+            @else
+                <h1 class="hub-main__title">Halo, Pengunjung. 👋</h1>
+            @endauth
         </div>
-        <a href="{{ url('/hub/qr') }}" class="hub-btn">
+        <div style="display:flex;gap:0.75rem;align-items:center;">
+            <a href="{{ url('/hub/qr') }}" class="hub-btn">
             <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3m0 4h4v-4m-7 0h3"/></svg>
             CHECK IN SEKARANG
         </a>
+            @auth
+                <form method="POST" action="{{ route('logout') }}" style="margin:0;">
+                    @csrf
+                    <button type="submit" class="hub-btn" style="background:transparent;border:1px solid rgba(255,255,255,0.06);">LOGOUT</button>
+                </form>
+            @else
+                <a href="{{ route('login') }}" class="hub-btn" style="background:transparent;border:1px solid rgba(255,255,255,0.06);">LOGIN</a>
+            @endauth
+        </div>
     </div>
 
     {{-- Stats --}}

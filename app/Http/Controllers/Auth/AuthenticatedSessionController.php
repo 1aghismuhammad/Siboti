@@ -42,7 +42,8 @@ class AuthenticatedSessionController extends Controller
                 return redirect('/receptionist/dashboard');
 
             default:
-                return redirect('/member/dashboard');
+                // Members should be sent to the public hub section
+                return redirect('/hub/dashboard');
         }
     }
 

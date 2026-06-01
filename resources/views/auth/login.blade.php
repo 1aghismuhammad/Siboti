@@ -98,19 +98,19 @@
     <div class="auth-card__right">
         <p class="auth-card__form-title">Masuk ke akun kamu</p>
 
-        <form class="auth-form" action="#" method="POST">
+        <form class="auth-form" action="{{ route('login') }}" method="POST">
             @csrf
             <div class="auth-form__group">
-                <label class="auth-form__label">Username</label>
-                <input type="text" class="auth-form__input" placeholder="Masukkan username kamu">
+                <label class="auth-form__label">Email</label>
+                <input type="email" name="email" class="auth-form__input" placeholder="Masukkan email kamu" value="{{ old('email') }}" required autofocus>
             </div>
             <div class="auth-form__group">
                 <label class="auth-form__label">Password</label>
-                <input type="password" class="auth-form__input" placeholder="••••••••">
+                <input type="password" name="password" class="auth-form__input" placeholder="••••••••" required>
             </div>
             <div class="auth-form__row">
                 <label class="auth-form__check">
-                    <input type="checkbox"> Ingat saya
+                    <input type="checkbox" name="remember"> Ingat saya
                 </label>
                 <a href="#" class="auth-form__forgot">Lupa password?</a>
             </div>

@@ -9,34 +9,32 @@ use App\Models\ProgressRecord;
 use App\Models\Subscription;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Carbon;
 
 class DemoDataSeeder extends Seeder
 {
     public function run(): void
     {
-        $trainer = User::factory()->create([
-            'name' => 'Trainer SiBoti',
-            'email' => 'trainer@siboti.com',
-            'role' => 'trainer',
-        ]);
-
         $receptionist = User::factory()->create([
             'name' => 'Receptionist SiBoti',
             'email' => 'receptionist@siboti.com',
             'role' => 'receptionist',
+            'password' => Hash::make('password'),
         ]);
 
         $member = User::factory()->create([
             'name' => 'Member SiBoti',
             'email' => 'member@siboti.com',
             'role' => 'member',
+            'password' => Hash::make('password'),
         ]);
 
         $memberTwo = User::factory()->create([
             'name' => 'Member Budi',
             'email' => 'member2@siboti.com',
             'role' => 'member',
+            'password' => Hash::make('password'),
         ]);
 
         $basicPlan = MembershipPlan::create([

@@ -17,7 +17,11 @@
             Latihan profesional, peralatan modern, dan suasana premium dalam satu tempat.
         </p>
         <div class="hero__buttons">
-            <a href="{{ url('/hub/booking') }}" class="btn-primary">BOOKING SEKARANG →</a>
+            @guest
+                <a href="{{ route('login') }}" class="btn-primary">BOOKING SEKARANG →</a>
+            @else
+                <a href="{{ url('/hub/booking') }}" class="btn-primary">BOOKING SEKARANG →</a>
+            @endguest
             <a href="#fasilitas" class="hero__btn-secondary">Lihat Fasilitas →</a>
         </div>
     </div>

@@ -7,6 +7,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReceptionistDashboardController;
 use App\Http\Controllers\ReportPageController;
 use App\Http\Controllers\ScanQrPageController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Middleware\EnsureUserRole;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
@@ -15,14 +17,40 @@ Route::get('/', function () {
     return view('home');
 });
 
-// Auth
-Route::get('/login', function () {
-    return view('auth.login');
-});
+// Auth (use controllers)
+Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
+Route::post('/login', [AuthenticatedSessionController::class, 'store']);
 
-Route::get('/register', function () {
-    return view('auth.register');
-});
+Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
+Route::post('/register', [RegisteredUserController::class, 'store']);
+
+// Logout
+Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+
+// Generic dashboard redirect (named for registration redirect)
+Route::get('/dashboard', function () {
+    $user = auth()->user();
+    if (! $user) {
+        return redirect()->route('login');
+    }
+
+    switch ($user->role) {
+        case 'admin':
+            return redirect('/admin/dashboard');
+        case 'trainer':
+            return redirect('/trainer/dashboard');
+        case 'receptionist':
+            return redirect('/receptionist/dashboard');
+            default:
+                // Members land on the public hub dashboard
+                return redirect('/hub/dashboard');
+    }
+})->middleware('auth')->name('dashboard');
+
+    // Member dashboard (simple placeholder)
+    Route::get('/member/dashboard', function () {
+        return view('member.dashboard');
+    })->middleware('auth')->name('member.dashboard');
 
 // SibotiHUB
 Route::get('/hub/dashboard', function () {
@@ -37,19 +65,40 @@ Route::get('/hub/progress', function () {
     return view('hub.progress');
 });
 
-// Trainer Panel
+Route::get('/hub/booking', function () {
+    return view('hub.booking');
+});
+
+// Admin / Role dashboards (use controllers)
+Route::get('/admin/dashboard', AdminDashboardController::class)
+    ->middleware('auth')
+    ->name('admin.dashboard');
+
+Route::get('/trainer/dashboard', PersonalTrainerDashboardController::class)
+    ->middleware('auth')
+    ->name('trainer.dashboard');
+
+Route::get('/receptionist/dashboard', ReceptionistDashboardController::class)
+    ->middleware('auth')
+    ->name('receptionist.dashboard');
+
+Route::get('/scan-qr', ScanQrPageController::class)
+    ->middleware('auth')
+    ->name('scan-qr.index');
+
+Route::get('/pos/dashboard', PosDashboardController::class)
+    ->middleware('auth')
+    ->name('pos.dashboard');
+
+Route::get('/reports', ReportPageController::class)
+    ->middleware('auth')
+    ->name('reports.index');
+
+// Trainer Panel (legacy views for trainer auth/register pages)
 Route::get('/trainer/login', function () {
     return view('crud_pelatih.login');
 });
 
 Route::get('/trainer/register', function () {
     return view('crud_pelatih.register');
-});
-
-Route::get('/trainer/dashboard', function () {
-    return view('crud_pelatih.dashboard');
-});
-
-Route::get('/hub/booking', function () {
-    return view('hub.booking');
 });

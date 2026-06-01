@@ -125,7 +125,11 @@
                 <img src="Image/Icon/user.webp" alt="User">
             </a>
 
-            <a href="{{ url('/hub/booking') }}" class="btn-primary navbar-top__cta">BOOKING SEKARANG →</a>
+            @guest
+                <a href="{{ route('login') }}" class="btn-primary navbar-top__cta">BOOKING SEKARANG →</a>
+            @else
+                <a href="{{ url('/hub/booking') }}" class="btn-primary navbar-top__cta">BOOKING SEKARANG →</a>
+            @endguest
         </div>
 
     </div>

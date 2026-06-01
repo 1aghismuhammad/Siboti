@@ -166,10 +166,23 @@
 
     {{-- Profile --}}
     <div class="hub-sidebar__profile">
-        <div class="hub-sidebar__avatar">BS</div>
-        <div>
-            <p class="hub-sidebar__profile-name">Budi Santoso</p>
-            <p class="hub-sidebar__profile-paket">Paket Pro</p>
-        </div>
+        @auth
+            <div class="hub-sidebar__avatar">{{ strtoupper(substr(auth()->user()->name,0,2)) }}</div>
+            <div style="flex:1;">
+                <p class="hub-sidebar__profile-name">{{ auth()->user()->name }}</p>
+                <p class="hub-sidebar__profile-paket">@if(auth()->user()->subscriptions()->where('status','active')->exists()) Paket Aktif @else Tidak ada paket @endif</p>
+            </div>
+            <form method="POST" action="{{ route('logout') }}" style="margin:0;">
+                @csrf
+                <button type="submit" class="hub-nav-item" style="background:transparent;border:0;padding:0.4rem 0.75rem;border-radius:0.5rem;color:rgba(255,255,255,0.7);font-weight:600;">Keluar</button>
+            </form>
+        @else
+            <div class="hub-sidebar__avatar">GV</div>
+            <div>
+                <p class="hub-sidebar__profile-name">Tamu</p>
+                <p class="hub-sidebar__profile-paket">Belum Login</p>
+            </div>
+            <a href="{{ route('login') }}" class="hub-nav-item" style="margin-left:auto;">Masuk</a>
+        @endauth
     </div>
 </aside>
