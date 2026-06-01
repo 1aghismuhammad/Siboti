@@ -2,20 +2,25 @@
 
 namespace App\Models;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 
-class Booking extends Model
+class PosTransaction extends Model
 {
     protected $fillable = [
+        'transaction_id',
+        'cashier',
         'user_id',
-        'booking_date',
-        'booking_time',
-        'session_type',
+        'member_name',
+        'total',
+        'items_count',
         'status',
+        'status_class',
+        'transacted_at',
     ];
 
     protected $casts = [
-        'booking_date' => 'date',
+        'transacted_at' => 'datetime',
     ];
 
     public function user()

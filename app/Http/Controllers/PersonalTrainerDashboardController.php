@@ -2,196 +2,184 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Booking;
+use App\Models\Checkin;
+use App\Models\ProgressRecord;
+use App\Models\Subscription;
+use Illuminate\Support\Carbon;
 use Illuminate\View\View;
 
 class PersonalTrainerDashboardController extends Controller
 {
     public function __invoke(): View
     {
+        $todaySchedules = Booking::with('user')
+            ->whereDate('booking_date', Carbon::today())
+            ->orderBy('booking_time')
+            ->get();
+
+        $activeClients = Subscription::where('status', 'active')
+            ->whereDate('end_date', '>=', Carbon::today())
+            ->distinct('user_id')
+            ->count('user_id');
+
+        $bookingsThisWeek = Booking::whereBetween('booking_date', [Carbon::today()->startOfWeek(), Carbon::today()->endOfWeek()])
+            ->count();
+
+        $progressCount = ProgressRecord::count();
+
         $stats = [
             [
                 'label' => 'Jadwal Hari Ini',
-                'value' => '08',
-                'note' => '+2 sesi hari ini',
+                'value' => number_format($todaySchedules->count(), 0, ',', '.'),
+                'note' => $todaySchedules->count() > 0 ? sprintf('%d sesi hari ini', $todaySchedules->count()) : 'Belum ada sesi',
                 'icon' => 'calendar_today',
                 'variant' => 'positive',
             ],
             [
                 'label' => 'Klien Aktif',
-                'value' => '24',
-                'note' => 'Stabil',
+                'value' => number_format($activeClients, 0, ',', '.'),
+                'note' => 'Berbasis subscription aktif',
                 'icon' => 'group',
                 'variant' => 'neutral',
             ],
             [
                 'label' => 'Booking Minggu Ini',
-                'value' => '15',
-                'note' => '3 perlu respon',
+                'value' => number_format($bookingsThisWeek, 0, ',', '.'),
+                'note' => sprintf('%d booking minggu ini', $bookingsThisWeek),
                 'icon' => 'event_available',
                 'variant' => 'warning',
             ],
             [
                 'label' => 'Progres Diinput',
-                'value' => '18',
-                'note' => '75% selesai',
+                'value' => number_format($progressCount, 0, ',', '.'),
+                'note' => 'Total progress records',
                 'icon' => 'trending_up',
                 'variant' => 'positive',
             ],
         ];
 
-        $todaySchedules = [
-            [
-                'start' => '06.00',
-                'end' => '07.00',
-                'member' => 'Budi Santoso',
-                'program' => 'Hypertrophy',
-                'focus' => 'Chest & Back',
-                'status' => 'Selesai',
-                'statusClass' => 'neutral',
-                'initials' => 'BS',
-            ],
-            [
-                'start' => '07.00',
-                'end' => '08.30',
-                'member' => 'Rina Susanti',
-                'program' => 'Strength & Conditioning',
-                'focus' => 'Leg Day',
-                'status' => 'Sedang Berjalan',
-                'statusClass' => 'success',
-                'initials' => 'RS',
-            ],
-            [
-                'start' => '09.00',
-                'end' => '10.00',
-                'member' => 'Dandi Pratama',
-                'program' => 'Fat Loss Program',
-                'focus' => 'HIIT',
-                'status' => 'Mendatang',
-                'statusClass' => 'warning',
-                'initials' => 'DP',
-            ],
-        ];
+        $recentBookings = Booking::with('user')
+            ->latest('booking_date')
+            ->limit(3)
+            ->get()
+            ->map(function (Booking $booking) {
+                return [
+                    'member' => $booking->user?->name ?? 'Guest',
+                    'membership' => ucfirst($booking->status),
+                    'time' => $booking->booking_date->format('d M Y') . ', ' . substr($booking->booking_time, 0, 5),
+                    'status' => $booking->status === 'pending' ? 'Menunggu' : 'Confirmed',
+                    'statusClass' => $booking->status === 'pending' ? 'warning' : 'success',
+                ];
+            })
+            ->toArray();
 
-        $recentBookings = [
-            [
-                'member' => 'Siska Amalia',
-                'membership' => 'Gold Member',
-                'time' => 'Besok, 08.00',
-                'status' => 'Menunggu',
-                'statusClass' => 'warning',
-            ],
-            [
-                'member' => 'Aditya Wijaya',
-                'membership' => 'Silver Member',
-                'time' => 'Rabu, 16.30',
-                'status' => 'Menunggu',
-                'statusClass' => 'warning',
-            ],
-            [
-                'member' => 'Melani Putri',
-                'membership' => 'Premium Member',
-                'time' => 'Jumat, 18.00',
-                'status' => 'Confirmed',
-                'statusClass' => 'success',
-            ],
-        ];
+        $bookings = Booking::with('user')
+            ->latest('booking_date')
+            ->limit(4)
+            ->get()
+            ->map(function (Booking $booking) {
+                return [
+                    'member' => $booking->user?->name ?? 'Guest',
+                    'program' => $booking->session_type,
+                    'dateTime' => $booking->booking_date->format('d M Y') . ', ' . substr($booking->booking_time, 0, 5),
+                    'status' => $this->normalizeBookingStatus($booking->status),
+                    'statusClass' => $this->getStatusClass($booking->status),
+                    'initials' => $this->getInitials($booking->user?->name ?? 'GM'),
+                ];
+            })
+            ->toArray();
 
-        $bookings = [
-            [
-                'member' => 'Rina Susanti',
-                'program' => 'Strength Conditioning',
-                'dateTime' => '24 Mei 2026, 07.00',
-                'status' => 'Terjadwal',
-                'statusClass' => 'success',
-                'initials' => 'RS',
-            ],
-            [
-                'member' => 'Amalia Melati',
-                'program' => 'Yoga Vinyasa',
-                'dateTime' => '24 Mei 2026, 14.00',
-                'status' => 'Menunggu',
-                'statusClass' => 'warning',
-                'initials' => 'AM',
-            ],
-            [
-                'member' => 'Budi Santoso',
-                'program' => 'Hypertrophy Program',
-                'dateTime' => '24 Mei 2026, 06.00',
-                'status' => 'Selesai',
-                'statusClass' => 'neutral',
-                'initials' => 'BS',
-            ],
-            [
-                'member' => 'Dandi Pratama',
-                'program' => 'Fat Loss HIIT',
-                'dateTime' => '23 Mei 2026, 10.00',
-                'status' => 'Dibatalkan',
-                'statusClass' => 'danger',
-                'initials' => 'DP',
-            ],
-        ];
+        $clients = Subscription::with('user', 'membershipPlan')
+            ->where('status', 'active')
+            ->whereDate('end_date', '>=', Carbon::today())
+            ->latest('end_date')
+            ->limit(3)
+            ->get()
+            ->map(function (Subscription $subscription) {
+                $user = $subscription->user;
+                return [
+                    'name' => $user?->name ?? 'Guest',
+                    'clientId' => sprintf('SBT-%04d', $user?->id ?? 0),
+                    'package' => $subscription->membershipPlan?->name ?? 'Membership',
+                    'remainingLabel' => 'Sisa Hari',
+                    'remaining' => Carbon::today()->diffInDays($subscription->end_date, false) . ' Hari',
+                    'statusClass' => 'success',
+                    'initials' => $this->getInitials($user?->name ?? 'GM'),
+                ];
+            })
+            ->toArray();
 
-        $clients = [
-            [
-                'name' => 'Siska Amalia',
-                'clientId' => 'SBT-29012',
-                'package' => 'Personal Training (12 Sesi)',
-                'remainingLabel' => 'Sisa Sesi',
-                'remaining' => '5 Sesi lagi',
-                'statusClass' => 'success',
-                'initials' => 'SA',
-            ],
-            [
-                'name' => 'Aditya Wijaya',
-                'clientId' => 'SBT-29044',
-                'package' => 'Bulking Program (24 Sesi)',
-                'remainingLabel' => 'Sisa Sesi',
-                'remaining' => '18 Sesi lagi',
-                'statusClass' => 'success',
-                'initials' => 'AW',
-            ],
-            [
-                'name' => 'Melani Putri',
-                'clientId' => 'SBT-29008',
-                'package' => 'Weight Loss (Monthly)',
-                'remainingLabel' => 'Masa Aktif',
-                'remaining' => 'Habis dalam 3 hari',
-                'statusClass' => 'danger',
-                'initials' => 'MP',
-            ],
-        ];
-
-        $progressHistory = [
-            ['member' => 'Dandi Pratama', 'time' => '2 jam yang lalu', 'weight' => '78 kg', 'waist' => '85 cm'],
-            ['member' => 'Rina Susanti', 'time' => '5 jam yang lalu', 'weight' => '55 kg', 'waist' => '68 cm'],
-            ['member' => 'Budi Santoso', 'time' => 'Kemarin', 'weight' => '82 kg', 'waist' => '88 cm'],
-        ];
+        $progressHistory = ProgressRecord::with('user')
+            ->latest()
+            ->limit(3)
+            ->get()
+            ->map(function (ProgressRecord $record) {
+                return [
+                    'member' => $record->user?->name ?? 'Guest',
+                    'time' => $record->created_at->diffForHumans(),
+                    'weight' => $record->weight ? number_format($record->weight, 1, ',', '.') . ' kg' : '-',
+                    'waist' => $record->height ? number_format($record->height, 1, ',', '.') . ' cm' : '-',
+                ];
+            })
+            ->toArray();
 
         $performanceSummaries = [
-            ['label' => 'Target Tercapai', 'value' => '12', 'unit' => 'Member', 'progress' => 70, 'variant' => 'positive'],
-            ['label' => 'Konsistensi Tinggi', 'value' => '85%', 'unit' => '', 'progress' => 85, 'variant' => 'positive'],
-            ['label' => 'Butuh Perhatian', 'value' => '03', 'unit' => 'Member', 'progress' => 15, 'variant' => 'danger'],
-            ['label' => 'Sesi Selesai MoM', 'value' => '+12%', 'unit' => '', 'progress' => 60, 'variant' => 'positive'],
+            [
+                'label' => 'Target Tercapai',
+                'value' => number_format(Booking::where('status', 'approved')->count(), 0, ',', '.'),
+                'unit' => 'Booking',
+                'progress' => 70,
+                'variant' => 'positive',
+            ],
+            [
+                'label' => 'Konsistensi Tinggi',
+                'value' => number_format($progressCount ? floor(($progressCount / max($activeClients, 1)) * 100) : 0, 0, ',', '.') . '%',
+                'unit' => '',
+                'progress' => min(100, $activeClients ? intval(($progressCount / $activeClients) * 100) : 0),
+                'variant' => 'positive',
+            ],
+            [
+                'label' => 'Butuh Perhatian',
+                'value' => number_format(Booking::where('status', 'pending')->count(), 0, ',', '.'),
+                'unit' => 'Booking',
+                'progress' => 15,
+                'variant' => 'danger',
+            ],
+            [
+                'label' => 'Sesi Selesai MoM',
+                'value' => '+12%',
+                'unit' => '',
+                'progress' => 60,
+                'variant' => 'positive',
+            ],
         ];
 
-        $activities = [
-            ['icon' => 'task_alt', 'text' => 'Coach Aris menyelesaikan sesi Strength dengan Rina Susanti.', 'time' => 'Hari ini, 08.32'],
-            ['icon' => 'edit_note', 'text' => 'Coach Aris menginput data progres fisik untuk Dandi Pratama.', 'time' => 'Hari ini, 06.15'],
-            ['icon' => 'event_available', 'text' => 'Booking Siska Amalia telah disetujui otomatis oleh sistem.', 'time' => 'Kemarin, 21.05'],
-        ];
+        $activities = Checkin::with('user')
+            ->latest('checkin_time')
+            ->limit(3)
+            ->get()
+            ->map(function (Checkin $checkin) {
+                return [
+                    'icon' => 'task_alt',
+                    'text' => sprintf('Coach mencatat check-in %s.', $checkin->user?->name ?? 'Guest'),
+                    'time' => $checkin->checkin_time->diffForHumans(),
+                ];
+            })
+            ->toArray();
 
         $alerts = [
             [
-                'title' => '3 Klien Butuh Evaluasi',
-                'description' => 'Progres dua minggu terakhir belum mencapai target minimal program.',
-                'type' => 'danger',
                 'icon' => 'warning',
+                'title' => sprintf('%d Klien Butuh Evaluasi', Booking::where('status', 'pending')->count()),
+                'description' => 'Setelah review, beberapa program perlu disesuaikan.',
+                'type' => 'danger',
             ],
             [
-                'title' => 'Maintenance Kalender',
-                'description' => 'Sinkronisasi jadwal akan dibatasi pada Minggu pukul 02.00 - 04.00 WIB.',
-                'type' => 'info',
                 'icon' => 'info',
+                'title' => 'Maintenance Kalender',
+                'description' => 'Sinkronisasi jadwal akan dibatasi pada Minggu dini hari.',
+                'type' => 'info',
             ],
         ];
 
@@ -206,5 +194,26 @@ class PersonalTrainerDashboardController extends Controller
             'activities',
             'alerts'
         ));
+    }
+
+    private function getStatusClass(string $status): string
+    {
+        return match ($status) {
+            'approved' => 'success',
+            'completed' => 'neutral',
+            'cancelled' => 'danger',
+            'pending' => 'warning',
+            default => 'neutral',
+        };
+    }
+
+    private function normalizeBookingStatus(string $status): string
+    {
+        return $status === 'pending' ? 'Menunggu' : ucfirst($status);
+    }
+
+    private function getInitials(string $name): string
+    {
+        return collect(explode(' ', $name))->map(fn ($part) => strtoupper(substr($part, 0, 1)))->join('');
     }
 }

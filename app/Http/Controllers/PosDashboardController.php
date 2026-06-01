@@ -2,211 +2,151 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\PosTransaction;
+use App\Models\Product;
+use App\Models\Subscription;
+use Illuminate\Support\Carbon;
 use Illuminate\View\View;
 
 class PosDashboardController extends Controller
 {
     public function __invoke(): View
     {
+        $todayTransactions = PosTransaction::whereDate('transacted_at', Carbon::today());
+        $totalSales = $todayTransactions->sum('total');
+        $soldProducts = $todayTransactions->sum('items_count');
+
         $stats = [
             [
                 'label' => 'Transaksi Hari Ini',
-                'value' => '24',
+                'value' => number_format($todayTransactions->count(), 0, ',', '.'),
                 'note' => '+12% dari kemarin',
                 'icon' => 'receipt_long',
                 'variant' => 'positive',
             ],
             [
                 'label' => 'Total Penjualan',
-                'value' => 'Rp4,25 jt',
+                'value' => 'Rp' . number_format($totalSales, 0, ',', '.'),
                 'note' => '+8% dari target',
                 'icon' => 'payments',
                 'variant' => 'positive',
             ],
             [
                 'label' => 'Produk Terjual',
-                'value' => '156 pcs',
+                'value' => number_format($soldProducts, 0, ',', '.') . ' pcs',
                 'note' => 'Stabil',
                 'icon' => 'inventory_2',
                 'variant' => 'neutral',
             ],
             [
                 'label' => 'Produk Populer',
-                'value' => 'Whey Isolate',
-                'note' => '12 unit hari ini',
+                'value' => Product::orderByDesc('sales_count')->first()?->name ?? 'Belum tersedia',
+                'note' => sprintf('%s unit hari ini', number_format($todayTransactions->sum('items_count'), 0, ',', '.')),
                 'icon' => 'trending_up',
                 'variant' => 'positive',
             ],
         ];
 
-        $products = [
-            [
-                'id' => 'P-001',
-                'name' => 'Air Mineral 600ml',
-                'category' => 'Minuman',
-                'description' => 'Hidrasi esensial untuk member setelah latihan.',
-                'price' => 5000,
-                'priceText' => 'Rp5.000',
-                'stock' => 5,
-                'badge' => 'Stok Rendah',
-                'badgeClass' => 'danger',
-                'icon' => 'water_bottle',
-            ],
-            [
-                'id' => 'P-002',
-                'name' => 'Protein Shake Vanilla',
-                'category' => 'Supplement',
-                'description' => 'Minuman protein siap konsumsi, 25g protein per serving.',
-                'price' => 35000,
-                'priceText' => 'Rp35.000',
-                'stock' => 28,
-                'badge' => 'Laris',
-                'badgeClass' => 'success',
-                'icon' => 'local_cafe',
-            ],
-            [
-                'id' => 'P-003',
-                'name' => 'SiBoti Microfiber Towel',
-                'category' => 'Aksesoris',
-                'description' => 'Handuk gym quick dry dengan branding SiBoti.',
-                'price' => 85000,
-                'priceText' => 'Rp85.000',
-                'stock' => 14,
-                'badge' => 'Ready',
-                'badgeClass' => 'neutral',
-                'icon' => 'dry_cleaning',
-            ],
-            [
-                'id' => 'P-004',
-                'name' => 'Whey Protein 1kg',
-                'category' => 'Supplement',
-                'description' => 'Produk suplemen protein utama untuk kebutuhan recovery.',
-                'price' => 850000,
-                'priceText' => 'Rp850.000',
-                'stock' => 11,
-                'badge' => 'Best Seller',
-                'badgeClass' => 'success',
-                'icon' => 'nutrition',
-            ],
-            [
-                'id' => 'P-005',
-                'name' => 'Shaker Pro Series',
-                'category' => 'Aksesoris',
-                'description' => 'Shaker botol premium untuk protein dan pre-workout.',
-                'price' => 120000,
-                'priceText' => 'Rp120.000',
-                'stock' => 20,
-                'badge' => 'Ready',
-                'badgeClass' => 'neutral',
-                'icon' => 'sports_mma',
-            ],
-            [
-                'id' => 'P-006',
-                'name' => 'SiBoti Training Shirt',
-                'category' => 'Merchandise',
-                'description' => 'Kaos latihan dry-fit dengan desain resmi SiBoti.',
-                'price' => 150000,
-                'priceText' => 'Rp150.000',
-                'stock' => 9,
-                'badge' => 'Limited',
-                'badgeClass' => 'warning',
-                'icon' => 'checkroom',
-            ],
-        ];
+        $products = Product::orderByDesc('sales_count')
+            ->limit(6)
+            ->get()
+            ->map(function (Product $product) {
+                return [
+                    'id' => $product->code,
+                    'name' => $product->name,
+                    'category' => $product->category,
+                    'description' => $product->description,
+                    'price' => $product->price,
+                    'priceText' => 'Rp' . number_format($product->price, 0, ',', '.'),
+                    'stock' => $product->stock,
+                    'badge' => $product->badge,
+                    'badgeClass' => $product->badge_class,
+                    'icon' => $product->icon,
+                ];
+            })
+            ->toArray();
 
-        $initialCart = [
-            ['productId' => 'P-002', 'qty' => 1],
-            ['productId' => 'P-003', 'qty' => 1],
-        ];
+        $members = Subscription::with('user', 'membershipPlan')
+            ->where('status', 'active')
+            ->whereDate('end_date', '>=', Carbon::today())
+            ->latest('end_date')
+            ->limit(3)
+            ->get()
+            ->map(function ($subscription) {
+                return [
+                    'memberId' => sprintf('MEM-%04d', $subscription->user?->id ?? 0),
+                    'name' => $subscription->user?->name ?? 'Guest',
+                    'package' => $subscription->membershipPlan?->name ?? 'Membership',
+                    'status' => 'Aktif',
+                    'statusClass' => 'success',
+                    'remaining' => Carbon::today()->diffInDays($subscription->end_date) . ' hari',
+                    'initials' => $this->getInitials($subscription->user?->name ?? 'GM'),
+                ];
+            })
+            ->toArray();
 
-        $members = [
-            [
-                'memberId' => 'MEM-0012',
-                'name' => 'Budi Santoso',
-                'package' => 'Gold Annual',
-                'status' => 'Aktif',
-                'statusClass' => 'success',
-                'remaining' => '148 hari',
-                'initials' => 'BS',
-            ],
-            [
-                'memberId' => 'MEM-0455',
-                'name' => 'Santi Rahayu',
-                'package' => 'Silver Monthly',
-                'status' => 'Expired',
-                'statusClass' => 'danger',
-                'remaining' => '0 hari',
-                'initials' => 'SR',
-            ],
-            [
-                'memberId' => 'MEM-0891',
-                'name' => 'Adrian Pratama',
-                'package' => 'Monthly Elite',
-                'status' => 'Aktif',
-                'statusClass' => 'success',
-                'remaining' => '24 hari',
-                'initials' => 'AP',
-            ],
-        ];
+        $transactions = PosTransaction::latest('transacted_at')
+            ->limit(3)
+            ->get()
+            ->map(function (PosTransaction $transaction) {
+                return [
+                    'trxId' => $transaction->transaction_id,
+                    'cashier' => $transaction->cashier,
+                    'member' => $transaction->member_name ?? 'Non-Member',
+                    'total' => 'Rp' . number_format($transaction->total, 0, ',', '.'),
+                    'status' => $transaction->status,
+                    'statusClass' => $transaction->status_class,
+                    'time' => $transaction->transacted_at->format('H:i'),
+                ];
+            })
+            ->toArray();
 
-        $transactions = [
-            [
-                'trxId' => '#TRX-9821',
-                'cashier' => 'Receptionist Andi',
-                'member' => 'Budi Santoso',
-                'total' => 'Rp125.000',
-                'status' => 'Berhasil',
-                'statusClass' => 'success',
-                'time' => '10.45',
-            ],
-            [
-                'trxId' => '#TRX-9820',
-                'cashier' => 'Receptionist Andi',
-                'member' => 'Non-Member',
-                'total' => 'Rp5.000',
-                'status' => 'Berhasil',
-                'statusClass' => 'success',
-                'time' => '10.30',
-            ],
-            [
-                'trxId' => '#TRX-9819',
-                'cashier' => 'Admin Siska',
-                'member' => 'Dewi Lestari',
-                'total' => 'Rp450.000',
-                'status' => 'Pending',
-                'statusClass' => 'warning',
-                'time' => '09.15',
-            ],
-        ];
+        $topProducts = Product::orderByDesc('sales_count')
+            ->limit(3)
+            ->get()
+            ->map(function (Product $product, $index) {
+                return [
+                    'rank' => $index + 1,
+                    'name' => $product->name,
+                    'sold' => number_format($product->sales_count, 0, ',', '.') . ' pcs',
+                ];
+            })
+            ->toArray();
 
-        $topProducts = [
-            ['rank' => 1, 'name' => 'Whey Protein 1kg', 'sold' => '45 pcs'],
-            ['rank' => 2, 'name' => 'Creatine Monohydrate', 'sold' => '32 pcs'],
-            ['rank' => 3, 'name' => 'Shaker Pro Series', 'sold' => '28 pcs'],
-        ];
+        $trendingProducts = Product::orderByDesc('sales_count')
+            ->limit(2)
+            ->get()
+            ->map(function (Product $product) {
+                return [
+                    'name' => $product->name,
+                    'growth' => '+25%',
+                    'note' => 'Naik sejak promo minggu ini',
+                ];
+            })
+            ->toArray();
 
-        $trendingProducts = [
-            ['name' => 'Pre-Workout Neon', 'growth' => '+25%', 'note' => 'Naik sejak promo minggu ini'],
-            ['name' => 'BCAA Recovery', 'growth' => '+18%', 'note' => 'Populer di kelas pagi'],
-        ];
-
-        $activities = [
-            ['icon' => 'inventory_2', 'text' => 'Restok inventaris dilakukan oleh Admin Siska.', 'time' => '15 menit yang lalu'],
-            ['icon' => 'point_of_sale', 'text' => 'Transaksi Protein Shake Vanilla berhasil disimpan.', 'time' => '31 menit yang lalu'],
-            ['icon' => 'sell', 'text' => 'Harga Member Premium Kit diperbarui sistem.', 'time' => '1 jam yang lalu'],
-            ['icon' => 'cancel', 'text' => 'Transaksi #TRX-9700 dibatalkan oleh kasir.', 'time' => '2 jam yang lalu'],
-        ];
+        $activities = PosTransaction::latest('transacted_at')
+            ->limit(4)
+            ->get()
+            ->map(function (PosTransaction $transaction) {
+                return [
+                    'icon' => 'point_of_sale',
+                    'text' => sprintf('Transaksi %s oleh %s berhasil disimpan.', $transaction->transaction_id, $transaction->cashier),
+                    'time' => $transaction->transacted_at->diffForHumans(),
+                ];
+            })
+            ->toArray();
 
         $alerts = [
             [
-                'title' => 'Stok Air Mineral Rendah',
-                'description' => 'Sisa 5 botol. Prioritaskan restok sebelum jam ramai sore.',
+                'title' => 'Stok Produk Rendah',
+                'description' => Product::where('stock', '<=', 5)->count() . ' produk perlu restok segera.',
                 'type' => 'danger',
                 'icon' => 'warning',
             ],
             [
                 'title' => 'Transaksi Pending',
-                'description' => 'Terdapat 3 transaksi pending yang perlu diselesaikan atau dibatalkan.',
+                'description' => PosTransaction::where('status', 'Pending')->count() . ' transaksi belum selesai.',
                 'type' => 'warning',
                 'icon' => 'pending_actions',
             ],
@@ -215,7 +155,6 @@ class PosDashboardController extends Controller
         return view('pos.dashboard', compact(
             'stats',
             'products',
-            'initialCart',
             'members',
             'transactions',
             'topProducts',
@@ -223,5 +162,10 @@ class PosDashboardController extends Controller
             'activities',
             'alerts'
         ));
+    }
+
+    private function getInitials(string $name): string
+    {
+        return collect(explode(' ', $name))->map(fn ($part) => strtoupper(substr($part, 0, 1)))->join('');
     }
 }

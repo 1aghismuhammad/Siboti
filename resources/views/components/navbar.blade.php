@@ -8,6 +8,16 @@
             <li><a href="#paket">Paket</a></li>
             <li><a href="#kontak">Kontak</a></li>
         </ul>
+
+        <div class="navbar-top__actions">
+            @guest
+                <a href="{{ route('login') }}" class="navbar-top__login">Masuk</a>
+                <a href="{{ route('register') }}" class="btn-secondary navbar-top__cta">Daftar</a>
+            @else
+                <a href="{{ route('dashboard') }}" class="btn-secondary navbar-top__cta">Dashboard</a>
+            @endguest
+        </div>
+
         <a href="#booking" class="btn-primary navbar-top__cta">BOOKING SEKARANG →</a>
     </div>
 </nav>
