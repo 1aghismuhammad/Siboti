@@ -65,6 +65,7 @@ class PersonalTrainerDashboardController extends Controller
             ->get()
             ->map(function (Booking $booking) {
                 return [
+                    'id' => $booking->id,
                     'member' => $booking->user?->name ?? 'Guest',
                     'membership' => ucfirst($booking->status),
                     'time' => $booking->booking_date->format('d M Y') . ', ' . substr($booking->booking_time, 0, 5),
@@ -99,6 +100,7 @@ class PersonalTrainerDashboardController extends Controller
             ->map(function (Subscription $subscription) {
                 $user = $subscription->user;
                 return [
+                    'id' => $user?->id,
                     'name' => $user?->name ?? 'Guest',
                     'clientId' => sprintf('SBT-%04d', $user?->id ?? 0),
                     'package' => $subscription->membershipPlan?->name ?? 'Membership',

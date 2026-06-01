@@ -249,7 +249,7 @@
 
                             <div class="trainer-client-card__actions">
                                 <button type="button" class="admin-small-button">Lihat Profil</button>
-                                <button type="button" class="admin-primary-button trainer-fill-progress" data-client="{{ $client['name'] }}">Input Progres</button>
+                                <button type="button" class="admin-primary-button trainer-fill-progress" data-client="{{ $client['name'] }}" data-id="{{ $client['id'] }}">Input Progres</button>
                             </div>
                         </article>
                     @endforeach
@@ -265,19 +265,28 @@
                         </div>
                     </div>
 
-                    <form id="trainerProgressForm" class="trainer-progress-form">
+                    @if(session('success'))
+                        <div class="alert alert-success" style="margin-bottom:1rem;padding:1rem;border-radius:12px;background:#e5ffcc;color:#1d3f00;">
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
+                    <form id="trainerProgressForm" class="trainer-progress-form" method="POST" action="{{ route('trainer.progress.store') }}">
+                        @csrf
+                        <input type="hidden" id="progressClientId" name="user_id" value="{{ $clients[0]['id'] ?? '' }}">
+
                         <div class="trainer-form-grid trainer-form-grid--two">
                             <label>
                                 <span>Pilih Member</span>
-                                <select id="progressClient" name="client">
+                                <select id="progressClient" name="user_id">
                                     @foreach ($clients as $client)
-                                        <option value="{{ $client['name'] }}">{{ $client['name'] }}</option>
+                                        <option value="{{ $client['id'] }}">{{ $client['name'] }}</option>
                                     @endforeach
                                 </select>
                             </label>
                             <label>
                                 <span>Tanggal Pengukuran</span>
-                                <input name="measurement_date" type="date" value="{{ now()->format('Y-m-d') }}">
+                                <input type="date" value="{{ now()->format('Y-m-d') }}" disabled>
                             </label>
                         </div>
 
@@ -399,30 +408,15 @@
 
 @push('scripts')
 <script>
-    const progressForm = document.getElementById('trainerProgressForm');
     const progressClient = document.getElementById('progressClient');
-    const progressHistoryList = document.getElementById('progressHistoryList');
+    const progressClientId = document.getElementById('progressClientId');
 
     document.querySelectorAll('.trainer-fill-progress').forEach((button) => {
         button.addEventListener('click', () => {
-            progressClient.value = button.dataset.client;
+            progressClient.value = button.dataset.id;
+            progressClientId.value = button.dataset.id;
             document.getElementById('input-progres').scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
-    });
-
-    progressForm.addEventListener('submit', (event) => {
-        event.preventDefault();
-        const formData = new FormData(progressForm);
-        const client = formData.get('client');
-        const weight = formData.get('weight') || '-';
-        const waist = formData.get('waist') || '-';
-
-        const item = document.createElement('div');
-        item.className = 'trainer-history-item trainer-history-item--new';
-        item.innerHTML = `<div><strong>${client}</strong><span>Baru saja</span></div><p>BB: ${weight} kg • LP: ${waist} cm</p>`;
-        progressHistoryList.prepend(item);
-        progressForm.reset();
-        progressClient.value = client;
     });
 </script>
 @endpush

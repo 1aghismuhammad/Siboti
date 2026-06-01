@@ -186,7 +186,21 @@
                                     <td>{{ $booking['date'] }}</td>
                                     <td>{{ $booking['time'] }}</td>
                                     <td><span class="admin-status admin-status--{{ $booking['statusClass'] }}">{{ $booking['status'] }}</span></td>
-                                    <td class="text-right"><a href="#" class="admin-link-button">Detail</a></td>
+                                    <td class="text-right">
+                                        @if($booking['status'] === 'Pending')
+                                            <form action="{{ route('booking.update', $booking['id']) }}" method="POST" style="display:inline-block; margin-right:.5rem;">
+                                                @csrf
+                                                @method('PATCH')
+                                                <input type="hidden" name="status" value="approved">
+                                                <button type="submit" class="admin-link-button">Setujui</button>
+                                            </form>
+                                        @endif
+                                        <form action="{{ route('booking.destroy', $booking['id']) }}" method="POST" style="display:inline-block;">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="admin-link-button admin-link-button--danger">Batalkan</button>
+                                        </form>
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>

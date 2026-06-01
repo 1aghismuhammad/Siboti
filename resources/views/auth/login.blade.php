@@ -39,21 +39,27 @@
     <div class="auth-card__right">
         <p class="auth-card__form-title">Masuk ke akun kamu</p>
 
-        <form class="auth-form" action="#" method="POST">
+        <form class="auth-form" action="{{ route('login') }}" method="POST">
             @csrf
             <div class="auth-form__group">
-                <label class="auth-form__label">Username</label>
-                <input type="text" class="auth-form__input" placeholder="Masukkan username kamu">
+                <label class="auth-form__label">Email</label>
+                <input id="email" name="email" type="email" class="auth-form__input" placeholder="Masukkan email kamu" value="{{ old('email') }}" required autofocus>
+                @error('email')
+                    <span class="auth-form__error">{{ $message }}</span>
+                @enderror
             </div>
             <div class="auth-form__group">
                 <label class="auth-form__label">Password</label>
-                <input type="password" class="auth-form__input" placeholder="••••••••">
+                <input id="password" name="password" type="password" class="auth-form__input" placeholder="••••••••" required>
+                @error('password')
+                    <span class="auth-form__error">{{ $message }}</span>
+                @enderror
             </div>
             <div class="auth-form__row">
                 <label class="auth-form__check">
-                    <input type="checkbox"> Ingat saya
+                    <input type="checkbox" name="remember"> Ingat saya
                 </label>
-                <a href="#" class="auth-form__forgot">Lupa password?</a>
+                <a href="{{ route('password.request') }}" class="auth-form__forgot">Lupa password?</a>
             </div>
             <button type="submit" class="auth-btn-primary">SIGN IN</button>
         </form>

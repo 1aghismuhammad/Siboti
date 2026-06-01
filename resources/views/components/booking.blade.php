@@ -39,7 +39,20 @@
                 <div id="ringkasan" class="ringkasan">
                     Sesi dipilih: <span id="ringkasan-waktu" class="ringkasan__waktu"></span>
                 </div>
-                <a href="#" onclick="konfirmasi(event)" class="btn-primary" style="display:block;text-align:center;">KONFIRMASI BOOKING</a>
+                @guest
+                    <div class="booking__notice" style="margin-top:1rem; text-align:center;">
+                        <p style="margin-bottom:1rem; color:#efefef;">Silakan login dulu untuk membuat booking.</p>
+                        <a href="{{ route('login') }}" class="btn-primary" style="display:inline-block; text-align:center;">LOGIN / REGISTER</a>
+                    </div>
+                @else
+                    <form id="bookingForm" method="POST" action="{{ route('member.booking.store') }}" style="margin-top:1rem;">
+                        @csrf
+                        <input type="hidden" name="booking_date" id="booking_date">
+                        <input type="hidden" name="booking_time" id="booking_time">
+                        <input type="hidden" name="session_type" id="session_type" value="Sesi Gym">
+                        <button type="submit" onclick="konfirmasi(event)" class="btn-primary" style="display:block;text-align:center;">KONFIRMASI BOOKING</button>
+                    </form>
+                @endguest
             </div>
         </div>
     </div>
@@ -121,10 +134,14 @@ function konfirmasi(e){
     if(!selectedDate){showToast('Pilih tanggal terlebih dahulu!');return;}
     if(selectedWaktu.length===0){showToast('Pilih minimal 1 sesi waktu!');return;}
     const sorted=[...selectedWaktu].sort((a,b)=>jadwal.indexOf(a)-jadwal.indexOf(b));
-    const days=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
-    const months=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
-    const tgl=days[selectedDate.getDay()]+', '+selectedDate.getDate()+' '+months[selectedDate.getMonth()]+' '+selectedDate.getFullYear();
-    showToast('✅ Booking dikonfirmasi!\n📅 '+tgl+'\n⏰ '+sorted.join(' & '),true);
+    const bookingDate = selectedDate.toISOString().slice(0,10);
+    const bookingTime = sorted.join(' - ');
+    const bookingDateInput = document.getElementById('booking_date');
+    const bookingTimeInput = document.getElementById('booking_time');
+    bookingDateInput.value = bookingDate;
+    bookingTimeInput.value = bookingTime;
+    showToast('✅ Booking dikonfirmasi!\n📅 '+bookingDate+'\n⏰ '+sorted.join(' & '),true);
+    document.getElementById('bookingForm').submit();
 }
 
 function showToast(msg,success=false){

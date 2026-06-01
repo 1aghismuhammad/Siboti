@@ -126,9 +126,28 @@
                 <img src="Image/Icon/user.webp" alt="User">
             </a>
 
-            <a href="#booking" class="navbar-top__cta">
-                BOOKING SEKARANG →
-            </a>
+            @guest
+                <a href="{{ route('login') }}" class="navbar-top__cta">
+                    LOGIN / BOOKING →
+                </a>
+            @else
+                @php
+                    $role = auth()->user()->role;
+                    $dashboardRoute = match ($role) {
+                        'admin' => route('admin.dashboard'),
+                        'trainer' => route('trainer.dashboard'),
+                        'receptionist' => route('receptionist.dashboard'),
+                        default => route('member.dashboard'),
+                    };
+                @endphp
+                <a href="{{ $dashboardRoute }}" class="navbar-top__cta">
+                    DASHBOARD
+                </a>
+                <form method="POST" action="{{ route('logout') }}" style="display:inline-block; margin-left:0.5rem;">
+                    @csrf
+                    <button type="submit" class="navbar-top__cta" style="background:#ff4d4f; color:#fff;">LOGOUT</button>
+                </form>
+            @endguest
         </div>
 
     </div>

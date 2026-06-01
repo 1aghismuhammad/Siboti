@@ -15,12 +15,6 @@ class DemoDataSeeder extends Seeder
 {
     public function run(): void
     {
-        $trainer = User::factory()->create([
-            'name' => 'Trainer SiBoti',
-            'email' => 'trainer@siboti.com',
-            'role' => 'trainer',
-        ]);
-
         $receptionist = User::factory()->create([
             'name' => 'Receptionist SiBoti',
             'email' => 'receptionist@siboti.com',

@@ -64,6 +64,7 @@ class AdminDashboardController extends Controller
             ->get()
             ->map(function (Booking $booking) {
                 return [
+                    'id' => $booking->id,
                     'member' => $booking->user?->name ?? 'Guest',
                     'trainer' => '-',
                     'session' => $booking->session_type,

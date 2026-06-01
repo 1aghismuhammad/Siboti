@@ -76,7 +76,7 @@
         </button>
 
         <p class="auth-footer-text">
-            Sudah punya akun? <a href="{{ url('/login') }}">Masuk di sini</a>
+            Sudah punya akun? <a href="{{ route('login') }}">Masuk di sini</a>
         </p>
     </div>
 </div>
