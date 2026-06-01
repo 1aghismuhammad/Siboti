@@ -1,5 +1,14 @@
 <?php
 
+use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\PersonalTrainerDashboardController;
+use App\Http\Controllers\PosDashboardController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReceptionistDashboardController;
+use App\Http\Controllers\ReportPageController;
+use App\Http\Controllers\ScanQrPageController;
+use App\Http\Middleware\EnsureUserRole;
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
