@@ -10,34 +10,34 @@
         </div>
         <div class="trainers__grid">
             <div class="trainer-card">
-                <img src="{{ asset('image/Pelatih/ambacong.webp') }}" alt="Ambacong - Trainer Pencetus Kesurupan Massal">
+                <img src="{{ asset('image/Pelatih/pelatih.webp') }}" alt="Mas Rafa - Trainer Pencetus Kesurupan Massal">
                 <div class="trainer-card__overlay"></div>
                 <div class="trainer-card__info">
-                    <p class="trainer-card__name">Ambacong</p>
-                    <p class="trainer-card__role">Trainer Pencetus Kesurupan Massal</p>
+                    <p class="trainer-card__name">Mas Rafa</p>
+                    <p class="trainer-card__role">Trainer Pencetus UAS Massal</p>
                 </div>
             </div>
             <div class="trainer-card">
-                <img src="{{ asset('image/Pelatih/Pahlawan_ngawi.webp') }}" alt="Pengendali Rusdi - Spesialis Counter Raja Terakhir">
+                <img src="{{ asset('image/Pelatih/pelatih.webp') }}" alt="Pengendali Rusdi - Spesialis Counter Raja Terakhir">
                 <div class="trainer-card__overlay"></div>
                 <div class="trainer-card__info">
-                    <p class="trainer-card__name">Pengendali Rusdi</p>
+                    <p class="trainer-card__name">Pengendali Gunpat</p>
                     <p class="trainer-card__role">Spesialis Counter Raja Terakhir</p>
                 </div>
             </div>
             <div class="trainer-card">
-                <img src="{{ asset('image/Pelatih/papa_zola.webp') }}" alt="Papa Zola - Pembasmi Wereng di Celana">
+                <img src="{{ asset('image/Pelatih/pelatih.webp') }}" alt="Papa Zola - Pembasmi Wereng di Celana">
                 <div class="trainer-card__overlay"></div>
                 <div class="trainer-card__info">
-                    <p class="trainer-card__name">Papa Zola</p>
-                    <p class="trainer-card__role">Pembasmi Wereng di Celana</p>
+                    <p class="trainer-card__name">Rafa Editor</p>
+                    <p class="trainer-card__role">Pembasmi Deadline UAS</p>
                 </div>
             </div>
             <div class="trainer-card">
-                <img src="{{ asset('image/Pelatih/pin_amba_jmk48.webp') }}" alt="Rusdi Icikiwir - Raja Terakhir">
+                <img src="{{ asset('image/Pelatih/pelatih.webp') }}" alt="Rusdi Icikiwir - Raja Terakhir">
                 <div class="trainer-card__overlay"></div>
                 <div class="trainer-card__info">
-                    <p class="trainer-card__name">Rusdi Icikiwir</p>
+                    <p class="trainer-card__name">Rafa Pudak Payung</p>
                     <p class="trainer-card__role">Raja Terakhir</p>
                 </div>
             </div>

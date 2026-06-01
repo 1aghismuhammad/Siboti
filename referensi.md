@@ -806,16 +806,16 @@ Gunakan checklist ini untuk memantau pekerjaan tim.
 ### Frontend Checklist
 
 - [ ] Landing page tetap rapi.
-- [ ] Login page selesai.
-- [ ] Register page selesai.
-- [ ] Dashboard member selesai.
-- [ ] Dashboard trainer selesai.
+- [ ] Login page selesai. ✅
+- [ ] Register page selesai. ✅
+- [ ] Dashboard member selesai. 
+- [ ] Dashboard trainer selesai. (pugres)
 - [ ] Dashboard receptionist selesai.
 - [ ] Dashboard admin selesai.
 - [ ] Booking page terhubung backend.
-- [ ] QR page selesai.
+- [ ] QR page selesai.✅
 - [ ] Scan QR page selesai.
-- [ ] Progress page selesai.
+- [ ] Progress page selesai.✅
 - [ ] POS page selesai.
 - [ ] Report page selesai.
 - [ ] Mobile Android rapi.

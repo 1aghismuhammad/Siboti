@@ -15,71 +15,24 @@ Route::get('/', function () {
     return view('home');
 });
 
-Route::get('/dashboard', function () {
-    $user = auth()->user();
-
-    switch ($user->role) {
-        case 'admin':
-            return redirect()->route('admin.dashboard');
-
-        case 'trainer':
-            return redirect()->route('trainer.dashboard');
-
-        case 'receptionist':
-            return redirect()->route('receptionist.dashboard');
-
-        default:
-            return redirect()->route('member.dashboard');
-    }
-})->middleware('auth')->name('dashboard');
-
-Route::middleware(['auth', EnsureUserRole::class.':admin'])->group(function () {
-    Route::redirect('/admin', '/admin/dashboard');
-    Route::get('/admin/dashboard', AdminDashboardController::class)->name('admin.dashboard');
-
-    Route::get('/admin/users', function () {
-        $users = User::latest()->limit(50)->get();
-        return view('admin.users.index', compact('users'));
-    })->name('admin.users.index');
+// Auth
+Route::get('/login', function () {
+    return view('auth.login');
 });
 
-Route::middleware(['auth', EnsureUserRole::class.':member,admin'])->group(function () {
-    Route::redirect('/member', '/member/dashboard');
-    Route::get('/member/dashboard', function () {
-        return view('member.dashboard');
-    })->name('member.dashboard');
+Route::get('/register', function () {
+    return view('auth.register');
 });
 
-Route::middleware(['auth', EnsureUserRole::class.':trainer,admin'])->group(function () {
-    Route::redirect('/trainer', '/trainer/dashboard');
-    Route::get('/trainer/dashboard', PersonalTrainerDashboardController::class)->name('trainer.dashboard');
+// SibotiHUB
+Route::get('/hub/dashboard', function () {
+    return view('hub.dashboard');
 });
 
-Route::middleware(['auth', EnsureUserRole::class.':receptionist,admin'])->group(function () {
-    Route::redirect('/receptionist', '/receptionist/dashboard');
-    Route::get('/receptionist/dashboard', ReceptionistDashboardController::class)->name('receptionist.dashboard');
-
-    Route::redirect('/pos', '/pos/dashboard');
-    Route::get('/pos/dashboard', PosDashboardController::class)->name('pos.dashboard');
-
-    Route::redirect('/scan-qr', '/scan-qr/check-in');
-    Route::get('/scan-qr/check-in', ScanQrPageController::class)->name('scan-qr.index');
+Route::get('/hub/qr', function () {
+    return view('hub.qr');
 });
 
-Route::middleware(['auth', EnsureUserRole::class.':admin,trainer,receptionist'])->group(function () {
-    Route::redirect('/reports', '/reports/dashboard');
-    Route::get('/reports/dashboard', ReportPageController::class)->name('reports.index');
+Route::get('/hub/progress', function () {
+    return view('hub.progress');
 });
-
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])
-        ->name('profile.edit');
-
-    Route::patch('/profile', [ProfileController::class, 'update'])
-        ->name('profile.update');
-
-    Route::delete('/profile', [ProfileController::class, 'destroy'])
-        ->name('profile.destroy');
-});
-
-require __DIR__.'/auth.php';
