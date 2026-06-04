@@ -95,10 +95,7 @@ Route::get('/reports', ReportPageController::class)
     ->name('reports.index');
 
 // Trainer Panel (legacy views for trainer auth/register pages)
-Route::get('/trainer/login', function () {
-    return view('crud_pelatih.login');
-});
-
-Route::get('/trainer/register', function () {
-    return view('crud_pelatih.register');
-});
+// Trainer login — pakai auth controller yang sama
+Route::get('/trainer/login', [AuthenticatedSessionController::class, 'create'])
+    ->name('trainer.login');
+Route::post('/trainer/login', [AuthenticatedSessionController::class, 'store']);

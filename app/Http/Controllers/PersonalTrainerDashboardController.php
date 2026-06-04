@@ -183,7 +183,7 @@ class PersonalTrainerDashboardController extends Controller
             ],
         ];
 
-        return view('trainer.dashboard', compact(
+        return view('crud_pelatih.dashboard', compact(
             'stats',
             'todaySchedules',
             'recentBookings',

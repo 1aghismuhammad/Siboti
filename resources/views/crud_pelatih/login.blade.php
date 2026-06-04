@@ -44,24 +44,26 @@
     <div class="trainer-auth-card__right">
         <p class="trainer-auth-form-title">Masuk ke Trainer Panel</p>
 
-        <form class="trainer-auth-form" action="#" method="POST">
-            @csrf
-            <div class="trainer-auth-form__group">
-                <label class="trainer-auth-form__label">E-Mail</label>
-                <input type="email" class="trainer-auth-form__input" placeholder="trainer@siboti.id">
+    <form class="trainer-auth-form" action="/trainer/login" method="POST">
+           @csrf
+          <div class="trainer-auth-form__group">
+        <label class="trainer-auth-form__label">E-Mail</label>
+        <input type="email" name="email" class="trainer-auth-form__input" 
+               placeholder="trainer@siboti.id" value="{{ old('email') }}">
+         </div>
+         <div class="trainer-auth-form__group">
+         <label class="trainer-auth-form__label">Password</label>
+         <input type="password" name="password" class="trainer-auth-form__input" 
+               placeholder="••••••••">
+           </div>
+          <div class="trainer-auth-row">
+            <label class="trainer-auth-check">
+                <input type="checkbox" name="remember"> Ingat Me
+           </label>
+          <a href="#" class="trainer-auth-forgot">Forgot Password?</a>
             </div>
-            <div class="trainer-auth-form__group">
-                <label class="trainer-auth-form__label">Password</label>
-                <input type="password" class="trainer-auth-form__input" placeholder="••••••••">
-            </div>
-            <div class="trainer-auth-row">
-                <label class="trainer-auth-check">
-                    <input type="checkbox"> Ingat Me
-                </label>
-                <a href="#" class="trainer-auth-forgot">Forgot Password?</a>
-            </div>
-            <button type="submit" class="trainer-auth-btn">SIGN UP</button>
-        </form>
+            <button type="submit" class="trainer-auth-btn">SIGN IN</button>
+    </form>
 
         <div class="trainer-auth-divider">OR CONTINUE</div>
 
@@ -74,6 +76,15 @@
             Belum punya akun? <a href="{{ url('/trainer/register') }}">Daftar Sekarang</a>
         </p>
     </div>
+
+    {{-- Tampilkan error login --}}
+    @if ($errors->any())
+        <div style="background:rgba(255,80,80,0.1);border:1px solid rgba(255,80,80,0.3);border-radius:0.625rem;padding:0.75rem 1rem;margin-bottom:1rem;">
+            @foreach ($errors->all() as $error)
+                <p style="color:#ff6b6b;font-size:0.8rem;font-weight:600;">{{ $error }}</p>
+            @endforeach
+        </div>
+    @endif
 </div>
 
 </body>
