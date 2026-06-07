@@ -160,7 +160,7 @@
         <a href="{{ url('/') }}"
            class="hub-nav-item {{ $active === 'profile' ? 'hub-nav-item--active' : '' }}">
             <img src="{{ asset('image/Icon/back.webp') }}" alt="Profil">
-            Profil
+            Keluar
         </a>
     </nav>
 
