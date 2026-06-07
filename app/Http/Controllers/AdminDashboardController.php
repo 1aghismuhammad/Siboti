@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Booking;
 use App\Models\Checkin;
-use App\Models\PosTransaction;
 use App\Models\Product;
 use App\Models\Subscription;
 use Illuminate\Support\Carbon;
@@ -75,18 +74,7 @@ class AdminDashboardController extends Controller
             })
             ->toArray();
 
-        $transactions = PosTransaction::latest('transacted_at')
-            ->limit(4)
-            ->get()
-            ->map(function (PosTransaction $transaction) {
-                return [
-                    'item' => $transaction->member_name ?: 'Non-Member',
-                    'time' => $transaction->transacted_at->format('H:i'),
-                    'amount' => 'Rp' . number_format($transaction->total, 0, ',', '.'),
-                    'icon' => 'local_cafe',
-                ];
-            })
-            ->toArray();
+
 
         $activities = Checkin::with('user')
             ->latest('checkin_time')
@@ -134,7 +122,7 @@ class AdminDashboardController extends Controller
             ];
         }
 
-        return view('admin.dashboard', compact('stats', 'bookings', 'transactions', 'activities', 'alerts'));
+        return view('admin.dashboard', compact('stats', 'bookings', 'activities', 'alerts'));
     }
 
     private function getStatusClass(string $status): string

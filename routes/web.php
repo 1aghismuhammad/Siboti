@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\PersonalTrainerDashboardController;
 use App\Http\Controllers\PosDashboardController;
+use App\Http\Controllers\PosHistoryController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReceptionistDashboardController;
 use App\Http\Controllers\ReportPageController;
@@ -74,6 +75,14 @@ Route::get('/admin/dashboard', AdminDashboardController::class)
     ->middleware('auth')
     ->name('admin.dashboard');
 
+Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
+    Route::get('/memberships', [\App\Http\Controllers\AdminPageController::class, 'memberships'])->name('memberships');
+    Route::get('/trainers', [\App\Http\Controllers\AdminPageController::class, 'trainers'])->name('trainers');
+    Route::get('/bookings', [\App\Http\Controllers\AdminPageController::class, 'bookings'])->name('bookings');
+    Route::get('/reports', [\App\Http\Controllers\AdminPageController::class, 'reports'])->name('reports');
+    Route::get('/maintenance', [\App\Http\Controllers\AdminPageController::class, 'maintenance'])->name('maintenance');
+});
+
 Route::get('/trainer/dashboard', PersonalTrainerDashboardController::class)
     ->middleware('auth')
     ->name('trainer.dashboard');
@@ -90,6 +99,10 @@ Route::get('/pos/dashboard', PosDashboardController::class)
     ->middleware('auth')
     ->name('pos.dashboard');
 
+Route::get('/pos/history', PosHistoryController::class)
+    ->middleware('auth')
+    ->name('pos.history');
+
 Route::get('/reports', ReportPageController::class)
     ->middleware('auth')
     ->name('reports.index');
@@ -99,3 +112,12 @@ Route::get('/reports', ReportPageController::class)
 Route::get('/trainer/login', [AuthenticatedSessionController::class, 'create'])
     ->name('trainer.login');
 Route::post('/trainer/login', [AuthenticatedSessionController::class, 'store']);
+
+Route::get('/scan-qr', ScanQrPageController::class)
+    ->middleware('auth')
+    ->name('scan-qr.index');
+
+// Tambahkan ini
+Route::post('/scan-qr/checkin', [ScanQrPageController::class, 'checkin'])
+    ->middleware('auth')
+    ->name('scan-qr.checkin');

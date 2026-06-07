@@ -1,52 +1,35 @@
 @extends('layouts.admin')
-
-@section('title', 'Scan QR Check-in')
+@section('title', 'Scan QR Member')
 
 @section('content')
-<div class="admin-shell scanqr-shell">
-    <aside class="admin-sidebar" aria-label="Navigasi Scan QR">
+<div class="admin-shell receptionist-shell">
+    <aside class="admin-sidebar" aria-label="Navigasi receptionist">
         <div class="admin-brand">
             <a href="{{ url('/') }}" class="admin-brand__mark" aria-label="Kembali ke beranda Siboti">
                 <span class="material-symbols-outlined">fitness_center</span>
             </a>
             <div>
                 <p class="admin-brand__name">Siboti</p>
-                <p class="admin-brand__label">Receptionist Portal</p>
+                <p class="admin-brand__label">Receptionist Desk</p>
             </div>
         </div>
 
         <nav class="admin-menu">
-            <a href="{{ route('admin.dashboard') }}" class="admin-menu__item">
-                <span class="material-symbols-outlined">admin_panel_settings</span>
-                <span>Admin Dashboard</span>
-            </a>
             <a href="{{ route('receptionist.dashboard') }}" class="admin-menu__item">
                 <span class="material-symbols-outlined">dashboard</span>
-                <span>Dashboard Receptionist</span>
+                <span>Dashboard</span>
             </a>
             <a href="{{ route('scan-qr.index') }}" class="admin-menu__item admin-menu__item--active">
                 <span class="material-symbols-outlined">qr_code_scanner</span>
                 <span>Scan QR</span>
             </a>
-            <a href="#riwayat-scan" class="admin-menu__item">
-                <span class="material-symbols-outlined">history</span>
-                <span>Riwayat Check-in</span>
-            </a>
             <a href="{{ route('pos.dashboard') }}" class="admin-menu__item">
                 <span class="material-symbols-outlined">point_of_sale</span>
-                <span>POS</span>
+                <span>Transaksi POS</span>
             </a>
-            <a href="{{ route('reports.index') }}" class="admin-menu__item">
-                <span class="material-symbols-outlined">bar_chart</span>
-                <span>Laporan</span>
-            </a>
-            <a href="#hasil-validasi" class="admin-menu__item">
-                <span class="material-symbols-outlined">person_search</span>
-                <span>Cari Member</span>
-            </a>
-            <a href="{{ route('trainer.dashboard') }}" class="admin-menu__item">
-                <span class="material-symbols-outlined">fitness_center</span>
-                <span>Personal Trainer</span>
+            <a href="{{ route('pos.history') }}" class="admin-menu__item">
+                <span class="material-symbols-outlined">receipt_long</span>
+                <span>Riwayat Transaksi</span>
             </a>
         </nav>
 
@@ -57,7 +40,8 @@
             </a>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit" class="admin-menu__item admin-menu__item--danger" style="width: 100%; border: 0; background: transparent; cursor: pointer;">
+                <button type="submit" class="admin-menu__item admin-menu__item--danger"
+                    style="width:100%;border:0;background:transparent;cursor:pointer;">
                     <span class="material-symbols-outlined">logout</span>
                     <span>Keluar</span>
                 </button>
@@ -68,236 +52,160 @@
     <div class="admin-main">
         <header class="admin-topbar">
             <div>
-                <p class="admin-eyebrow">Front Desk Access Control</p>
-                <h1>Scan QR Check-in</h1>
+                <p class="admin-eyebrow">Panel Operasional Front Desk</p>
+                <h1>Scan QR Member</h1>
             </div>
-
             <div class="admin-topbar__actions">
                 <label class="admin-search">
                     <span class="material-symbols-outlined">search</span>
-                    <input id="topScanSearch" type="search" placeholder="Cari ID member atau nama..." aria-label="Cari data scan QR">
+                    <input type="search" placeholder="Cari member atau ID..." aria-label="Cari member">
                 </label>
                 <button type="button" class="admin-icon-button" aria-label="Notifikasi">
                     <span class="material-symbols-outlined">notifications</span>
-                    <span class="admin-icon-button__dot"></span>
                 </button>
                 <div class="admin-profile" aria-label="Profil receptionist">
-                    <span>QR</span>
+                    <span>RC</span>
                 </div>
             </div>
         </header>
 
-        <main class="admin-content scanqr-content">
-            <section class="admin-card scanqr-hero">
-                <div>
-                    <p class="admin-eyebrow">Validasi Akses Member</p>
-                    <h2>Scan QR member, cek status membership, lalu konfirmasi check-in dari satu halaman.</h2>
-                    <p>Halaman ini disiapkan untuk receptionist saat member datang ke gym. Data masih dummy untuk kebutuhan presentasi frontend, tetapi alur UI sudah mengikuti kebutuhan check-in nyata.</p>
-                </div>
-                <div class="scanqr-hero__actions">
-                    <button type="button" class="admin-primary-button" data-fill-code="MEM-2024-0891">
-                        <span class="material-symbols-outlined">qr_code_scanner</span>
-                        Simulasi Scan Valid
-                    </button>
-                    <button type="button" class="admin-small-button" data-fill-code="MEM-0455">
-                        Simulasi Expired
-                    </button>
-                </div>
-            </section>
-
-            <section class="admin-stats" aria-label="Statistik scan QR">
-                @foreach ($stats as $stat)
-                    <article class="admin-card admin-stat-card">
-                        <div class="admin-stat-card__top">
-                            <div class="admin-card-icon">
-                                <span class="material-symbols-outlined">{{ $stat['icon'] }}</span>
-                            </div>
-                            <span class="admin-pill admin-pill--{{ $stat['variant'] }}">{{ $stat['note'] }}</span>
-                        </div>
-                        <p>{{ $stat['label'] }}</p>
-                        <h2>{{ $stat['value'] }}</h2>
-                    </article>
-                @endforeach
-            </section>
-
-            <section class="scanqr-main-grid">
-                <article class="admin-card scanqr-scanner-card">
-                    <div class="admin-section-head">
-                        <div>
-                            <h2>Area Scanner</h2>
-                            <p>Pilih mode scan, lalu masukkan ID member untuk validasi manual atau demo.</p>
-                        </div>
-                        <span id="scannerModeBadge" class="admin-pill admin-pill--positive">QR Ready</span>
-                    </div>
-
-                    <div class="scanqr-mode-tabs" aria-label="Mode scanner">
-                        <button type="button" class="scanqr-mode-tab is-active" data-scan-mode="QR Ready">
-                            <span class="material-symbols-outlined">qr_code_scanner</span>
-                            QR Scanner
-                        </button>
-                        <button type="button" class="scanqr-mode-tab" data-scan-mode="Manual Input">
-                            <span class="material-symbols-outlined">keyboard</span>
-                            Manual Input
-                        </button>
-                        <button type="button" class="scanqr-mode-tab" data-scan-mode="Kamera Demo">
-                            <span class="material-symbols-outlined">photo_camera</span>
-                            Kamera Demo
-                        </button>
-                    </div>
-
-                    <div class="scanqr-scanner" aria-hidden="true">
-                        <span class="material-symbols-outlined">qr_code_2</span>
-                        <i></i>
-                    </div>
-
-                    <div class="scanqr-form">
-                        <label for="scanCodeInput">ID Member / QR Token</label>
-                        <div class="scanqr-input-row">
-                            <input id="scanCodeInput" type="text" value="MEM-2024-0891" placeholder="Contoh: MEM-2024-0891">
-                            <button type="button" id="scanValidateButton" class="admin-primary-button">Validasi</button>
-                        </div>
-                        <p id="scanHelperText">Contoh dummy: MEM-2024-0891, MEM-0012, MEM-0455, MEM-0921, MEM-0777.</p>
-                    </div>
-                </article>
-
-                <aside class="scanqr-side-stack">
-                    <article id="hasil-validasi" class="admin-card scanqr-result-card">
-                        <div class="admin-section-head">
-                            <div>
-                                <h2>Hasil Validasi</h2>
-                                <p>Status akses member muncul setelah QR divalidasi.</p>
-                            </div>
-                            <span id="scanStatus" class="admin-status admin-status--success">AKTIF</span>
-                        </div>
-
-                        <div class="scanqr-member-card">
-                            <div id="scanMemberInitials" class="scanqr-member-avatar">AP</div>
-                            <div>
-                                <h3 id="scanMemberName">Adrian Pratama</h3>
-                                <p id="scanMemberId">MEM-2024-0891</p>
-                            </div>
-                        </div>
-
-                        <div class="scanqr-member-meta">
-                            <div>
-                                <span>Paket</span>
-                                <strong id="scanMemberPackage">Monthly Elite</strong>
-                            </div>
-                            <div>
-                                <span>Sisa Masa Aktif</span>
-                                <strong id="scanMemberRemaining">24 Hari</strong>
-                            </div>
-                            <div>
-                                <span>Check-in Terakhir</span>
-                                <strong id="scanMemberLastCheckin">Belum check-in hari ini</strong>
-                            </div>
-                        </div>
-
-                        <p id="scanMemberNote" class="scanqr-member-note">Member aktif. Check-in dapat dikonfirmasi.</p>
-
-                        <div class="scanqr-result-actions">
-                            <button type="button" id="confirmScanButton" class="admin-primary-button">
-                                <span class="material-symbols-outlined">how_to_reg</span>
-                                Konfirmasi Check-in
-                            </button>
-                            <button type="button" id="resetScanButton" class="admin-small-button">Reset</button>
-                        </div>
-                    </article>
-
-                    <article class="admin-card scanqr-status-card">
-                        <div class="scanqr-status-row">
-                            <span class="material-symbols-outlined">settings_input_antenna</span>
-                            <div>
-                                <strong>Status Scanner</strong>
-                                <p>Kamera front desk siap menerima QR member.</p>
-                            </div>
-                            <b>Online</b>
-                        </div>
-                        <div class="scanqr-status-row">
-                            <span class="material-symbols-outlined">badge</span>
-                            <div>
-                                <strong>Mode Validasi</strong>
-                                <p>Membership, duplikasi, dan blokir akun.</p>
-                            </div>
-                            <b>Aktif</b>
-                        </div>
-                    </article>
-                </aside>
-            </section>
-
+        <main class="admin-content">
             <section class="admin-grid admin-grid--two">
-                <article class="admin-card scanqr-guide-card">
-                    <div class="admin-section-head">
+
+                {{-- PANEL SCAN --}}
+                <article class="admin-card receptionist-scanner-card">
+                    <div class="admin-section-head admin-section-head--bordered">
                         <div>
-                            <h2>Cara Penggunaan</h2>
-                            <p>Alur operasional receptionist saat melakukan check-in member.</p>
+                            <h2>Scan QR Member</h2>
+                            <p>Arahkan kamera ke QR code atau masukkan ID manual.</p>
+                        </div>
+                        <span id="cameraStatus" class="admin-pill admin-pill--positive">Ready</span>
+                    </div>
+
+                    {{-- Viewport kamera --}}
+                    <div style="position:relative;background:#0d0d0d;border-radius:10px;overflow:hidden;aspect-ratio:4/3;margin-bottom:16px;">
+                        <video id="cameraFeed" autoplay playsinline
+                            style="width:100%;height:100%;object-fit:cover;display:block;"></video>
+
+                        {{-- Overlay garis scanner --}}
+                        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;">
+                            <div style="width:180px;height:180px;border:2px solid #c6f135;border-radius:12px;position:relative;">
+                                <span style="position:absolute;top:-1px;left:-1px;width:20px;height:20px;border-top:3px solid #c6f135;border-left:3px solid #c6f135;border-radius:3px 0 0 0;"></span>
+                                <span style="position:absolute;top:-1px;right:-1px;width:20px;height:20px;border-top:3px solid #c6f135;border-right:3px solid #c6f135;border-radius:0 3px 0 0;"></span>
+                                <span style="position:absolute;bottom:-1px;left:-1px;width:20px;height:20px;border-bottom:3px solid #c6f135;border-left:3px solid #c6f135;border-radius:0 0 0 3px;"></span>
+                                <span style="position:absolute;bottom:-1px;right:-1px;width:20px;height:20px;border-bottom:3px solid #c6f135;border-right:3px solid #c6f135;border-radius:0 0 3px 0;"></span>
+                                <div id="scanLine" style="position:absolute;left:4px;right:4px;height:2px;background:#c6f135;opacity:0.8;animation:scanAnim 2s linear infinite;top:0;"></div>
+                            </div>
+                        </div>
+
+                        {{-- Tombol kamera --}}
+                        <div style="position:absolute;bottom:10px;right:10px;display:flex;gap:8px;">
+                            <button type="button" id="startCamera"
+                                style="background:#c6f135;color:#111;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">
+                                <span class="material-symbols-outlined" style="font-size:15px;">videocam</span>
+                                Mulai Kamera
+                            </button>
+                            <button type="button" id="stopCamera"
+                                style="display:none;background:#2a2a2a;color:#ccc;border:1px solid #333;border-radius:8px;padding:7px 14px;font-size:12px;cursor:pointer;display:none;align-items:center;gap:6px;">
+                                <span class="material-symbols-outlined" style="font-size:15px;">videocam_off</span>
+                                Stop
+                            </button>
                         </div>
                     </div>
-                    <div class="scanqr-guide-list">
-                        @foreach ($instructions as $instruction)
-                            <div class="scanqr-guide-item">
-                                <span>{{ $instruction['step'] }}</span>
-                                <div>
-                                    <strong>{{ $instruction['title'] }}</strong>
-                                    <p>{{ $instruction['description'] }}</p>
-                                </div>
-                            </div>
-                        @endforeach
+
+                    {{-- Input manual --}}
+                    <div class="receptionist-form">
+                        <label for="memberCode" style="font-size:12px;color:#888;margin-bottom:6px;display:block;">
+                            Atau masukkan ID Member secara manual
+                        </label>
+                        <input id="memberCode" type="text" placeholder="Contoh: MEM-2024-0891"
+                            style="text-transform:uppercase;">
+                        <button type="button" id="validateBtn" class="admin-primary-button"
+                            style="margin-top:10px;width:100%;">
+                            <span class="material-symbols-outlined" style="font-size:16px;vertical-align:-3px;">search</span>
+                            Validasi Member
+                        </button>
                     </div>
                 </article>
 
-                <article class="admin-card">
-                    <div class="admin-section-head">
+                {{-- PANEL HASIL VALIDASI --}}
+                <article class="admin-card receptionist-validation-card">
+                    <div class="admin-section-head admin-section-head--bordered">
                         <div>
-                            <h2>Peringatan Scan</h2>
-                            <p>Informasi penting yang perlu diperhatikan receptionist.</p>
+                            <h2>Hasil Validasi</h2>
+                            <p>Status member sesuai ID yang diinput.</p>
+                        </div>
+                        <span id="memberStatusBadge" class="admin-status admin-status--success">AKTIF</span>
+                    </div>
+
+                    <div class="receptionist-member" style="margin:24px 0;">
+                        <div id="memberInitials" class="receptionist-member__avatar">--</div>
+                        <h3 id="memberName" style="margin-top:12px;">Belum divalidasi</h3>
+                        <p id="memberId" style="font-size:12px;color:#666;margin-top:4px;">Masukkan ID member di sebelah kiri</p>
+                    </div>
+
+                    <div class="receptionist-member-grid" style="margin-bottom:16px;">
+                        <div>
+                            <span>Paket</span>
+                            <strong id="memberPackage">—</strong>
+                        </div>
+                        <div>
+                            <span>Sisa Hari</span>
+                            <strong id="memberRemaining">—</strong>
                         </div>
                     </div>
-                    <div class="admin-alert-list">
-                        @foreach ($alerts as $alert)
-                            <div class="admin-alert admin-alert--{{ $alert['type'] }}">
-                                <span class="material-symbols-outlined">{{ $alert['icon'] }}</span>
-                                <div>
-                                    <strong>{{ $alert['title'] }}</strong>
-                                    <p>{{ $alert['description'] }}</p>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
+
+                    <p id="memberNote" class="receptionist-note"
+                        style="font-size:12px;color:#888;margin-bottom:16px;padding:10px;background:#141414;border-radius:8px;border-left:3px solid #333;">
+                        Menunggu validasi ID member...
+                    </p>
+
+                    <button type="button" id="confirmBtn" class="admin-primary-button receptionist-confirm-button"
+                        style="width:100%;" disabled>
+                        <span class="material-symbols-outlined" style="font-size:16px;vertical-align:-3px;">how_to_reg</span>
+                        Konfirmasi Check-in
+                    </button>
                 </article>
             </section>
 
-            <section id="riwayat-scan" class="admin-card admin-table-card">
+            {{-- RIWAYAT CHECK-IN HARI INI --}}
+            <section class="admin-card admin-table-card" style="margin-top:0;">
                 <div class="admin-section-head admin-section-head--bordered">
                     <div>
-                        <h2>Riwayat Scan Terbaru</h2>
-                        <p>Log check-in QR dan validasi manual pada shift hari ini.</p>
+                        <h2>Riwayat Check-in Hari Ini</h2>
+                        <p>Log validasi member pada shift receptionist hari ini</p>
                     </div>
-                    <a href="{{ route('receptionist.dashboard') }}#riwayat-checkin" class="admin-text-link">Lihat Dashboard Receptionist</a>
+                    <span class="admin-pill admin-pill--positive" id="checkinCount">
+                        {{ count($todayCheckins) }} check-in
+                    </span>
                 </div>
                 <div class="admin-table-wrap">
-                    <table class="admin-table">
+                    <table class="admin-table" id="checkinTable">
                         <thead>
                             <tr>
-                                <th>Waktu</th>
                                 <th>Nama</th>
                                 <th>ID Member</th>
-                                <th>Metode</th>
-                                <th>Gate</th>
+                                <th>Paket</th>
+                                <th>Waktu</th>
                                 <th>Status</th>
                             </tr>
                         </thead>
-                        <tbody id="recentScanTable">
-                            @foreach ($recentScans as $scan)
-                                <tr>
-                                    <td>{{ $scan['time'] }}</td>
-                                    <td class="admin-table__strong">{{ $scan['name'] }}</td>
-                                    <td>{{ $scan['memberId'] }}</td>
-                                    <td>{{ $scan['method'] }}</td>
-                                    <td>{{ $scan['gate'] }}</td>
-                                    <td><span class="admin-status admin-status--{{ $scan['statusClass'] }}">{{ $scan['status'] }}</span></td>
-                                </tr>
-                            @endforeach
+                        <tbody id="checkinBody">
+                            @forelse($todayCheckins as $c)
+                            <tr>
+                                <td class="admin-table__strong">{{ $c['name'] }}</td>
+                                <td>{{ $c['memberId'] }}</td>
+                                <td>{{ $c['package'] }}</td>
+                                <td>{{ $c['time'] }}</td>
+                                <td><span class="admin-status admin-status--{{ $c['statusClass'] }}">{{ $c['status'] }}</span></td>
+                            </tr>
+                            @empty
+                            <tr id="emptyRow">
+                                <td colspan="5" style="text-align:center;color:#555;padding:24px;">
+                                    Belum ada check-in hari ini.
+                                </td>
+                            </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
@@ -305,132 +213,242 @@
         </main>
     </div>
 </div>
-@endsection
+
+{{-- MODAL SUKSES --}}
+<div id="successModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:999;align-items:center;justify-content:center;">
+    <div style="background:#1a1a1a;border:1px solid #2a3d0a;border-radius:16px;padding:40px 36px;text-align:center;max-width:360px;width:90%;">
+        <div style="width:64px;height:64px;border-radius:50%;background:#1e2a0a;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
+            <span class="material-symbols-outlined" style="font-size:32px;color:#c6f135;">how_to_reg</span>
+        </div>
+        <h2 style="font-size:18px;font-weight:700;color:#e0e0e0;margin-bottom:6px;">Check-in Berhasil!</h2>
+        <p id="modalName" style="font-size:15px;color:#c6f135;font-weight:600;margin-bottom:4px;"></p>
+        <p id="modalPackage" style="font-size:12px;color:#888;margin-bottom:8px;"></p>
+        <p id="modalTime" style="font-size:12px;color:#555;margin-bottom:24px;"></p>
+        <button type="button" id="modalClose" class="admin-primary-button" style="width:100%;">
+            Scan Berikutnya
+        </button>
+    </div>
+</div>
 
 @push('scripts')
+{{-- Library jsQR untuk decode QR dari kamera --}}
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+
+<style>
+@keyframes scanAnim {
+    0%   { top: 4px; }
+    50%  { top: calc(100% - 6px); }
+    100% { top: 4px; }
+}
+</style>
+
 <script>
-    const scanMembers = @json($members);
+const members = @json($members);
+const csrfToken = '{{ csrf_token() }}';
 
-    const scanInput = document.getElementById('scanCodeInput');
-    const scanStatus = document.getElementById('scanStatus');
-    const scanMemberInitials = document.getElementById('scanMemberInitials');
-    const scanMemberName = document.getElementById('scanMemberName');
-    const scanMemberId = document.getElementById('scanMemberId');
-    const scanMemberPackage = document.getElementById('scanMemberPackage');
-    const scanMemberRemaining = document.getElementById('scanMemberRemaining');
-    const scanMemberLastCheckin = document.getElementById('scanMemberLastCheckin');
-    const scanMemberNote = document.getElementById('scanMemberNote');
-    const confirmScanButton = document.getElementById('confirmScanButton');
-    const scanHelperText = document.getElementById('scanHelperText');
-    const recentScanTable = document.getElementById('recentScanTable');
-    const scannerModeBadge = document.getElementById('scannerModeBadge');
+// ── State
+let currentMember = null;
+let cameraStream   = null;
+let scanInterval   = null;
+let checkinCount   = {{ count($todayCheckins) }};
 
-    let selectedMember = scanMembers['MEM-2024-0891'];
+// ── Elemen
+const memberCode        = document.getElementById('memberCode');
+const validateBtn       = document.getElementById('validateBtn');
+const confirmBtn        = document.getElementById('confirmBtn');
+const startCameraBtn    = document.getElementById('startCamera');
+const stopCameraBtn     = document.getElementById('stopCamera');
+const cameraFeed        = document.getElementById('cameraFeed');
+const cameraStatus      = document.getElementById('cameraStatus');
+const memberStatusBadge = document.getElementById('memberStatusBadge');
+const memberInitials    = document.getElementById('memberInitials');
+const memberName        = document.getElementById('memberName');
+const memberId          = document.getElementById('memberId');
+const memberPackage     = document.getElementById('memberPackage');
+const memberRemaining   = document.getElementById('memberRemaining');
+const memberNote        = document.getElementById('memberNote');
+const successModal      = document.getElementById('successModal');
+const checkinBody       = document.getElementById('checkinBody');
+const checkinCountBadge = document.getElementById('checkinCount');
 
-    function normalizeScanCode(value) {
-        const code = value.trim().toUpperCase();
-        const tokenEntry = Object.values(scanMembers).find((member) => member.qrToken === code);
-        return tokenEntry ? tokenEntry.memberId : code;
+// ── Render hasil validasi
+function renderMember(member) {
+    currentMember = member;
+
+    if (!member) {
+        memberStatusBadge.className = 'admin-status admin-status--danger';
+        memberStatusBadge.textContent = 'TIDAK VALID';
+        memberInitials.textContent = '?';
+        memberName.textContent = 'Member Tidak Ditemukan';
+        memberId.textContent = 'ID tidak terdaftar dalam sistem';
+        memberPackage.textContent = '—';
+        memberRemaining.textContent = '—';
+        memberNote.textContent = 'ID member tidak ditemukan. Periksa ulang atau hubungi admin.';
+        memberNote.style.borderLeftColor = '#a32d2d';
+        confirmBtn.disabled = true;
+        return;
     }
 
-    function setStatusClass(element, statusClass) {
-        element.className = `admin-status admin-status--${statusClass}`;
+    const isActive = member.status === 'active';
+    const statusLabel = isActive ? 'AKTIF' : (member.status === 'expired' ? 'EXPIRED' : 'SUSPENDED');
+    const statusClass = isActive ? 'success' : 'danger';
+
+    memberStatusBadge.className = `admin-status admin-status--${statusClass}`;
+    memberStatusBadge.textContent = statusLabel;
+    memberInitials.textContent = member.initials;
+    memberName.textContent = member.name;
+    memberId.textContent = 'ID: ' + member.memberId;
+    memberPackage.textContent = member.package;
+    memberRemaining.textContent = member.remaining > 0 ? member.remaining + ' Hari' : 'Expired';
+    memberNote.style.borderLeftColor = isActive ? '#c6f135' : '#a32d2d';
+
+    if (isActive) {
+        memberNote.textContent = 'Member valid. Silakan konfirmasi check-in.';
+        confirmBtn.disabled = false;
+    } else {
+        memberNote.textContent = 'Member tidak aktif. Check-in tidak dapat dilakukan.';
+        confirmBtn.disabled = true;
     }
+}
 
-    function renderMember(member) {
-        selectedMember = member;
-        setStatusClass(scanStatus, member.statusClass);
-        scanStatus.textContent = member.status;
-        scanMemberInitials.textContent = member.initials;
-        scanMemberName.textContent = member.name;
-        scanMemberId.textContent = member.memberId;
-        scanMemberPackage.textContent = member.package;
-        scanMemberRemaining.textContent = member.remaining;
-        scanMemberLastCheckin.textContent = member.lastCheckin;
-        scanMemberNote.textContent = member.note;
+// ── Validasi manual
+function validateMember(code) {
+    const key = code.trim().toUpperCase();
+    renderMember(members[key] || null);
+}
 
-        confirmScanButton.disabled = !member.access;
-        confirmScanButton.classList.toggle('scanqr-confirm-disabled', !member.access);
-        scanHelperText.textContent = member.access
-            ? 'Status valid. Tekan Konfirmasi Check-in untuk mencatat akses masuk.'
-            : 'Status tidak valid. Jangan beri akses sebelum masalah diselesaikan.';
-    }
+validateBtn.addEventListener('click', () => {
+    validateMember(memberCode.value);
+});
 
-    function validateScan() {
-        const normalizedCode = normalizeScanCode(scanInput.value);
-        const member = scanMembers[normalizedCode];
+memberCode.addEventListener('keydown', e => {
+    if (e.key === 'Enter') validateMember(memberCode.value);
+});
 
-        if (!member) {
-            renderMember({
-                name: 'Member Tidak Ditemukan',
-                memberId: normalizedCode || 'UNKNOWN',
-                package: '-',
-                remaining: '-',
-                lastCheckin: '-',
-                status: 'INVALID',
-                statusClass: 'danger',
-                note: 'ID member atau QR token tidak ditemukan pada data dummy.',
-                initials: '??',
-                access: false,
-            });
-            return;
-        }
-
-        scanInput.value = member.memberId;
-        renderMember(member);
-    }
-
-    document.getElementById('scanValidateButton').addEventListener('click', validateScan);
-    scanInput.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            validateScan();
-        }
-    });
-
-    document.querySelectorAll('[data-fill-code]').forEach((button) => {
-        button.addEventListener('click', () => {
-            scanInput.value = button.dataset.fillCode;
-            validateScan();
+// ── Kamera & QR Scan
+startCameraBtn.addEventListener('click', async () => {
+    try {
+        cameraStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: 'environment' }
         });
-    });
+        cameraFeed.srcObject = cameraStream;
+        cameraStatus.textContent = 'Kamera Aktif';
+        cameraStatus.className = 'admin-pill admin-pill--positive';
+        startCameraBtn.style.display = 'none';
+        stopCameraBtn.style.display = 'flex';
 
-    document.querySelectorAll('.scanqr-mode-tab').forEach((button) => {
-        button.addEventListener('click', () => {
-            document.querySelectorAll('.scanqr-mode-tab').forEach((tab) => tab.classList.remove('is-active'));
-            button.classList.add('is-active');
-            scannerModeBadge.textContent = button.dataset.scanMode;
+        // Scan frame setiap 500ms
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        scanInterval = setInterval(() => {
+            if (cameraFeed.readyState !== cameraFeed.HAVE_ENOUGH_DATA) return;
+            canvas.width  = cameraFeed.videoWidth;
+            canvas.height = cameraFeed.videoHeight;
+            ctx.drawImage(cameraFeed, 0, 0, canvas.width, canvas.height);
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const code = jsQR(imageData.data, canvas.width, canvas.height);
+            if (code && code.data) {
+                memberCode.value = code.data;
+                validateMember(code.data);
+                stopCamera(); // stop setelah berhasil scan
+            }
+        }, 500);
+
+    } catch (err) {
+        cameraStatus.textContent = 'Kamera Ditolak';
+        cameraStatus.className = 'admin-pill admin-pill--danger';
+        alert('Akses kamera ditolak. Gunakan input manual.');
+    }
+});
+
+function stopCamera() {
+    if (cameraStream) {
+        cameraStream.getTracks().forEach(t => t.stop());
+        cameraStream = null;
+    }
+    if (scanInterval) {
+        clearInterval(scanInterval);
+        scanInterval = null;
+    }
+    cameraFeed.srcObject = null;
+    cameraStatus.textContent = 'Ready';
+    cameraStatus.className = 'admin-pill admin-pill--positive';
+    startCameraBtn.style.display = 'flex';
+    stopCameraBtn.style.display = 'none';
+}
+
+stopCameraBtn.addEventListener('click', stopCamera);
+
+// ── Konfirmasi Check-in (POST ke server)
+confirmBtn.addEventListener('click', async () => {
+    if (!currentMember) return;
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = 'Menyimpan...';
+
+    try {
+        const res = await fetch('{{ route("scan-qr.checkin") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+            },
+            body: JSON.stringify({ member_id: currentMember.memberId }),
         });
-    });
 
-    confirmScanButton.addEventListener('click', () => {
-        if (!selectedMember || !selectedMember.access) {
-            scanHelperText.textContent = 'Check-in tidak bisa dikonfirmasi karena status member tidak valid.';
-            return;
+        const data = await res.json();
+
+        if (data.success) {
+            // Tampilkan modal
+            document.getElementById('modalName').textContent    = currentMember.name;
+            document.getElementById('modalPackage').textContent = currentMember.package;
+            document.getElementById('modalTime').textContent    = 'Check-in pukul ' + data.time;
+            successModal.style.display = 'flex';
+
+            // Tambahkan baris ke tabel riwayat
+            const emptyRow = document.getElementById('emptyRow');
+            if (emptyRow) emptyRow.remove();
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="admin-table__strong">${currentMember.name}</td>
+                <td>${currentMember.memberId}</td>
+                <td>${currentMember.package}</td>
+                <td>${data.time}</td>
+                <td><span class="admin-status admin-status--success">Berhasil</span></td>
+            `;
+            checkinBody.prepend(tr);
+
+            checkinCount++;
+            checkinCountBadge.textContent = checkinCount + ' check-in';
+        } else {
+            alert(data.message);
         }
+    } catch (err) {
+        alert('Terjadi kesalahan. Coba lagi.');
+    } finally {
+        confirmBtn.disabled = false;
+        confirmBtn.innerHTML = '<span class="material-symbols-outlined" style="font-size:16px;vertical-align:-3px;">how_to_reg</span> Konfirmasi Check-in';
+    }
+});
 
-        const now = new Date();
-        const time = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace(':', '.');
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${time}</td>
-            <td class="admin-table__strong">${selectedMember.name}</td>
-            <td>${selectedMember.memberId}</td>
-            <td>QR Scanner</td>
-            <td>Front Desk</td>
-            <td><span class="admin-status admin-status--success">Berhasil</span></td>
-        `;
-        recentScanTable.prepend(row);
-        scanHelperText.textContent = `Check-in ${selectedMember.name} berhasil dicatat pada ${time}.`;
-    });
-
-    document.getElementById('resetScanButton').addEventListener('click', () => {
-        scanInput.value = 'MEM-2024-0891';
-        renderMember(scanMembers['MEM-2024-0891']);
-    });
-
-    document.getElementById('topScanSearch').addEventListener('input', (event) => {
-        scanInput.value = event.target.value;
-    });
+// ── Tutup modal
+document.getElementById('modalClose').addEventListener('click', () => {
+    successModal.style.display = 'none';
+    memberCode.value = '';
+    renderMember(null);
+    memberStatusBadge.className = 'admin-status admin-status--success';
+    memberStatusBadge.textContent = 'AKTIF';
+    memberInitials.textContent = '--';
+    memberName.textContent = 'Belum divalidasi';
+    memberId.textContent = 'Masukkan ID member di sebelah kiri';
+    memberNote.textContent = 'Menunggu validasi ID member...';
+    memberNote.style.borderLeftColor = '#333';
+    memberPackage.textContent = '—';
+    memberRemaining.textContent = '—';
+    currentMember = null;
+});
 </script>
 @endpush
+
+@endsection

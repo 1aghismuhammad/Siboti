@@ -416,47 +416,31 @@
             </div>
         </div>
         <nav class="admin-menu">
-            <a href="{{ url('/admin/dashboard') }}" class="admin-menu__item admin-menu__item--active">
+            <a href="{{ route('admin.dashboard') }}" class="admin-menu__item {{ request()->routeIs('admin.dashboard') ? 'admin-menu__item--active' : '' }}">
                 <span class="material-symbols-outlined">dashboard</span>
                 <span>Dashboard</span>
             </a>
-            <a href="#" class="admin-menu__item">
-                <span class="material-symbols-outlined">group</span>
-                <span>Pengguna</span>
-            </a>
-            <a href="#" class="admin-menu__item">
+            <a href="{{ route('admin.memberships') }}" class="admin-menu__item {{ request()->routeIs('admin.memberships') ? 'admin-menu__item--active' : '' }}">
                 <span class="material-symbols-outlined">card_membership</span>
                 <span>Paket Keanggotaan</span>
             </a>
-            <a href="{{ route('trainer.dashboard') }}" class="admin-menu__item">
+            <a href="{{ route('admin.trainers') }}" class="admin-menu__item {{ request()->routeIs('admin.trainers') ? 'admin-menu__item--active' : '' }}">
                 <span class="material-symbols-outlined">fitness_center</span>
                 <span>Personal Trainer</span>
             </a>
-            <a href="#" class="admin-menu__item">
+            <a href="{{ route('admin.bookings') }}" class="admin-menu__item {{ request()->routeIs('admin.bookings') ? 'admin-menu__item--active' : '' }}">
                 <span class="material-symbols-outlined">event_available</span>
                 <span>Booking</span>
             </a>
-            <a href="{{ route('receptionist.dashboard') }}" class="admin-menu__item">
-                <span class="material-symbols-outlined">support_agent</span>
-                <span>Receptionist</span>
-            </a>
-            <a href="{{ route('scan-qr.index') }}" class="admin-menu__item">
-                <span class="material-symbols-outlined">qr_code_scanner</span>
-                <span>Scan QR</span>
-            </a>
-            <a href="{{ route('pos.dashboard') }}" class="admin-menu__item">
-                <span class="material-symbols-outlined">point_of_sale</span>
-                <span>Transaksi POS</span>
-            </a>
-            <a href="{{ route('reports.index') }}" class="admin-menu__item">
+            <a href="{{ route('admin.reports') }}" class="admin-menu__item {{ request()->routeIs('admin.reports') ? 'admin-menu__item--active' : '' }}">
                 <span class="material-symbols-outlined">bar_chart</span>
                 <span>Laporan</span>
             </a>
         </nav>
         <div class="admin-sidebar__footer">
-            <a href="#" class="admin-menu__item">
-                <span class="material-symbols-outlined">settings</span>
-                <span>Pengaturan</span>
+            <a href="{{ route('admin.maintenance') }}" class="admin-menu__item {{ request()->routeIs('admin.maintenance') ? 'admin-menu__item--active' : '' }}">
+                <span class="material-symbols-outlined">build</span>
+                <span>Pemeliharaan Sistem</span>
             </a>
             <form method="POST" action="{{ route('logout') }}" style="margin: 0;">
                 @csrf
@@ -564,7 +548,7 @@
                 </article>
             </section>
             {{-- TABLE SECTION --}}
-            <section class="admin-card admin-table-card">
+            <section id="booking-terbaru" class="admin-card admin-table-card">
                 <div class="admin-section-head admin-section-head--bordered">
                     <div>
                         <h2>Booking Terbaru</h2>
@@ -616,61 +600,25 @@
                         <div class="admin-progress-item">
                             <div><span>Aktif</span><strong>75%</strong></div>
                             <progress max="100" value="75"></progress>
+                            <div><span>Approved</span><strong>{{ \App\Models\Booking::where('status', 'approved')->count() }}</strong></div>
+                            <progress max="100" value="{{ min(100, \App\Models\Booking::where('status', 'approved')->count() * 10) }}"></progress>
                         </div>
                         <div class="admin-progress-item admin-progress-item--danger">
-                            <div><span>Mendekati Expired</span><strong>15%</strong></div>
-                            <progress max="100" value="15"></progress>
+                            <div><span>Pending</span><strong>{{ \App\Models\Booking::where('status', 'pending')->count() }}</strong></div>
+                            <progress max="100" value="{{ min(100, \App\Models\Booking::where('status', 'pending')->count() * 10) }}"></progress>
                         </div>
                         <div class="admin-progress-item admin-progress-item--muted">
-                            <div><span>Telah Expired</span><strong>10%</strong></div>
-                            <progress max="100" value="10"></progress>
+                            <div><span>Cancelled</span><strong>{{ \App\Models\Booking::where('status', 'cancelled')->count() }}</strong></div>
+                            <progress max="100" value="{{ min(100, \App\Models\Booking::where('status', 'cancelled')->count() * 10) }}"></progress>
                         </div>
-                    </div>
-                    <div class="admin-summary-line">
-                        <span>Total expired bulan ini</span>
-                        <strong>12</strong>
-                    </div>
-                </article>
-                {{-- Transactions List --}}
-                <article class="admin-card admin-table-card">
-                    <div class="admin-section-head admin-section-head--bordered">
-                        <div>
-                            <h2>Transaksi POS Terbaru</h2>
-                            <p>Penjualan produk gym dan minuman</p>
-                        </div>
-                        <a href="#" class="admin-text-link">Lihat Semua</a>
-                    </div>
-                    <div class="admin-transaction-list">
-                        @foreach ($transactions as $transaction)
-                            <div class="admin-transaction">
-                                <div class="admin-transaction__item">
-                                    <span class="material-symbols-outlined">{{ $transaction['icon'] }}</span>
-                                    <div>
-                                        <strong>{{ $transaction['item'] }}</strong>
-                                        <small>{{ $transaction['time'] }}</small>
-                                    </div>
-                                </div>
-                                <strong>{{ $transaction['amount'] }}</strong>
-                            </div>
-                        @endforeach
                     </div>
                 </article>
             </section>
             {{-- QUICK ACTIONS SECTION --}}
             <section class="admin-quick-actions" aria-label="Aksi cepat admin">
-                <a href="{{ route('receptionist.dashboard') }}" class="admin-quick-action">
-                    <span class="material-symbols-outlined">support_agent</span>
-                    <strong>Dashboard Receptionist</strong>
-                    <i class="material-symbols-outlined">chevron_right</i>
-                </a>
-                <a href="{{ route('scan-qr.index') }}" class="admin-quick-action">
-                    <span class="material-symbols-outlined">qr_code_scanner</span>
-                    <strong>Scan QR Check-in</strong>
-                    <i class="material-symbols-outlined">chevron_right</i>
-                </a>
-                <a href="{{ route('pos.dashboard') }}" class="admin-quick-action">
-                    <span class="material-symbols-outlined">point_of_sale</span>
-                    <strong>Dashboard POS</strong>
+                <a href="#" class="admin-quick-action">
+                    <span class="material-symbols-outlined">card_membership</span>
+                    <strong>Paket Keanggotaan</strong>
                     <i class="material-symbols-outlined">chevron_right</i>
                 </a>
                 <a href="{{ route('trainer.dashboard') }}" class="admin-quick-action">
@@ -678,9 +626,9 @@
                     <strong>Dashboard Personal Trainer</strong>
                     <i class="material-symbols-outlined">chevron_right</i>
                 </a>
-                <a href="{{ route('reports.index') }}" class="admin-quick-action">
-                    <span class="material-symbols-outlined">insert_chart</span>
-                    <strong>Laporan Operasional</strong>
+                <a href="#booking-terbaru" class="admin-quick-action">
+                    <span class="material-symbols-outlined">event_available</span>
+                    <strong>Lihat Booking</strong>
                     <i class="material-symbols-outlined">chevron_right</i>
                 </a>
             </section>
