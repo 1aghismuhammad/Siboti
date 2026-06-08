@@ -114,8 +114,18 @@
     .trainer-sidebar__footer-name { font-size: 0.8rem; font-weight: 700; color: #fff; margin-bottom: 0.1rem;}
     .trainer-sidebar__footer-role { font-size: 0.65rem; color: rgba(255,255,255,0.3); }
     
-    .logout-btn { background: none; border: none; color: rgba(255,100,100,0.6); font-size: 1rem; cursor: pointer; padding: 0.25rem; transition: color 0.2s; }
-    .logout-btn:hover { color: rgba(255,100,100,1); }
+    .logout-btn { background: none; border: none; color: rgba(255,100,100,0.6); display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0.4rem; border-radius: 0.4rem; transition: all 0.2s; }
+    .logout-btn:hover { color: #ff5050; background: rgba(255,80,80,0.1); }
+    
+    .trainer-member-item__delete {
+        position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%);
+        background: rgba(255,80,80,0.1); border: 1px solid rgba(255,80,80,0.2);
+        color: #ff5050; width: 24px; height: 24px; border-radius: 6px;
+        display: flex; align-items: center; justify-content: center;
+        opacity: 0; transition: all 0.2s; cursor: pointer;
+    }
+    .trainer-member-item:hover .trainer-member-item__delete { opacity: 1; }
+    .trainer-member-item__delete:hover { background: rgba(255,80,80,0.2); color: #ff8080; }
     /* ═══ MAIN AREA ═══ */
     .trainer-main {
         flex: 1; padding: 2.5rem 3rem 4rem;
@@ -445,18 +455,25 @@
             <input type="text" class="trainer-sidebar__search" placeholder="Cari member..." oninput="filterMember(this.value)">
         </div>
     </div>
-    <p class="trainer-sidebar__section-title">Member Saya (4)</p>
+    <p class="trainer-sidebar__section-title">Member Saya ({{ count($clients) }})</p>
     <div class="trainer-member-list" id="member-list">
         @forelse($clients as $index => $m)
-        <a href="#" onclick="pilihMember('{{ $m['name'] }}', event)"
-           class="trainer-member-item {{ $index === 0 ? 'trainer-member-item--active' : '' }}"
-           data-nama="{{ strtolower($m['name']) }}">
+        <div class="trainer-member-item {{ $index === 0 ? 'trainer-member-item--active' : '' }}"
+             data-nama="{{ strtolower($m['name']) }}" style="position:relative; cursor:pointer;"
+             onclick="pilihMember('{{ $m['name'] }}', event)">
             <div class="trainer-member-item__avatar">{{ $m['initials'] }}</div>
             <div class="trainer-member-item__info">
                 <p class="trainer-member-item__name">{{ $m['name'] }}</p>
                 <p class="trainer-member-item__paket">{{ $m['package'] }}</p>
             </div>
-        </a>
+            <form action="{{ route('trainer.member.remove', $m['user_id']) }}" method="POST" style="display:inline;" onsubmit="return confirm('Yakin ingin menghapus member ini? Seluruh jadwal yang terhubung akan dibatalkan.');">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="trainer-member-item__delete" onclick="event.stopPropagation();" title="Hapus Member">
+                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                </button>
+            </form>
+        </div>
         @empty
         <p style="text-align: center; color: rgba(255,255,255,0.4); padding: 1rem; font-size: 0.8rem;">Belum ada member yang booking.</p>
         @endforelse
@@ -471,7 +488,13 @@
         </div>
         <form method="POST" action="{{ route('logout') }}" style="display:inline;">
             @csrf
-            <button type="submit" class="logout-btn" title="Keluar">⎋</button>
+            <button type="submit" class="logout-btn" title="Keluar">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+            </button>
         </form>
     </div>
 </aside>
@@ -491,7 +514,7 @@
     {{-- Tab Navigation --}}
     <div class="tab-nav-wrapper">
         <label class="tab-nav__item" for="tab-progress">Progress Member</label>
-        <label class="tab-nav__item" for="tab-booking">Booking Masuk <span style="background:rgba(204,255,0,0.1); color:#CCFF00; padding:2px 6px; border-radius:4px; font-size:0.65rem; margin-left:4px;">2</span></label>
+        <label class="tab-nav__item" for="tab-booking">Booking Masuk <span style="background:rgba(204,255,0,0.1); color:#CCFF00; padding:2px 6px; border-radius:4px; font-size:0.65rem; margin-left:4px;">{{ $pendingCount ?? 0 }}</span></label>
         <label class="tab-nav__item" for="tab-jadwal">Atur Jadwal Saya</label>
     </div>
     {{-- ══════════════════════════════════════
@@ -564,7 +587,7 @@
         {{-- Filter bar --}}
         <div class="booking-filter-bar" style="margin-bottom: 1.5rem;">
             <button class="booking-filter-btn booking-filter-btn--active" onclick="filterBooking('semua', this)">Semua Booking</button>
-            <button class="booking-filter-btn" onclick="filterBooking('pending', this)">Menunggu (2)</button>
+            <button class="booking-filter-btn" onclick="filterBooking('pending', this)">Menunggu ({{ $pendingCount ?? 0 }})</button>
             <button class="booking-filter-btn" onclick="filterBooking('confirmed', this)">Dikonfirmasi</button>
         </div>
         <div class="booking-list" id="booking-list">
@@ -623,11 +646,52 @@
                     <input type="date" id="jadwal-date" value="{{ date('Y-m-d') }}" onchange="gantiTanggalJadwal(this.value)">
                 </div>
             </div>
-            <div class="jadwal-grid" id="jadwal-grid">
+            <div class="jadwal-grid" id="jadwal-grid" style="margin-top: 1rem;">
                 {{-- Di-generate JS berdasarkan tanggal --}}
             </div>
-            <div style="display:flex; justify-content:flex-end;">
+            <div style="display:flex; justify-content:flex-end; margin-bottom: 2rem;">
                 <button class="trainer-btn" onclick="simpanJadwal()">Simpan Perubahan Jadwal</button>
+            </div>
+            
+            <div style="margin-top: 2rem; margin-bottom: 1rem;">
+                <h3 style="color:#fff; font-size: 1.1rem; margin: 0;">Sesi Terjadwal</h3>
+                <p style="font-size:0.75rem; color:rgba(255,255,255,0.4); margin-top: 0.25rem;">Daftar member dengan booking yang telah disetujui pada hari ini.</p>
+            </div>
+            <div class="trainer-table-wrap" style="margin-bottom: 2rem;">
+                <div class="trainer-table-scroll">
+                    <table class="trainer-table">
+                        <thead>
+                            <tr>
+                                <th>Waktu</th>
+                                <th>Nama Member</th>
+                                <th>Program / Sesi</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($bookings ?? [] as $booking)
+                                @if(strtolower($booking['statusClass']) === 'success')
+                                <tr>
+                                    <td style="font-weight:600; color:#CCFF00;">{{ explode(', ', $booking['dateTime'])[1] ?? '00:00' }}</td>
+                                    <td><span class="trainer-table__badge">{{ $booking['member'] ?? 'Member' }}</span></td>
+                                    <td>{{ $booking['program'] ?? 'Personal Training' }}</td>
+                                    <td><span style="color:#00c864; font-weight:700;">Dikonfirmasi</span></td>
+                                    <td>
+                                        <button class="trainer-btn-outline" style="padding:0.4rem 0.8rem; font-size:0.75rem;">Mulai Sesi</button>
+                                    </td>
+                                </tr>
+                                @endif
+                            @empty
+                            <tr>
+                                <td colspan="5" style="text-align:center; padding:2rem; color:rgba(255,255,255,0.4);">
+                                    Belum ada sesi jadwal yang disetujui.
+                                </td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>

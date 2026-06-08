@@ -717,31 +717,38 @@
             <p class="hub-card__empty">Belum ada booking aktif. Pilih trainer dan jadwal untuk membuat reservasi.</p>
         @else
             <table class="hub-table">
-                <thead>
+                <thead style="background: rgba(255,255,255,0.02); text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.4);">
                     <tr>
-                        <th>Trainer</th>
-                        <th>Tanggal</th>
-                        <th>Waktu</th>
-                        <th>Status</th>
-                        <th>Aksi</th>
+                        <th style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">Trainer</th>
+                        <th style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">Tanggal</th>
+                        <th style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">Waktu</th>
+                        <th style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">Status</th>
+                        <th style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($myBookings as $booking)
                         <tr>
-                            <td>{{ $booking->trainer?->name ?? '-' }}</td>
-                            <td>{{ $booking->booking_date->format('d M Y') }}</td>
-                            <td>{{ substr($booking->booking_time, 0, 5) }}</td>
-                            <td>{{ ucfirst($booking->status) }}</td>
-                            <td>
+                            <td style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); color: #fff;">{{ $booking->trainer?->name ?? '-' }}</td>
+                            <td style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); color: #ccc;">{{ $booking->booking_date->format('d M Y') }}</td>
+                            <td style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); color: #ccff00; font-weight: 700;">{{ substr($booking->booking_time, 0, 5) }}</td>
+                            <td style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                <span style="font-size:0.7rem; font-weight:700; padding:0.3rem 0.6rem; border-radius:9999px;
+                                    @if($booking->status === 'approved') background:rgba(204,255,0,0.1); color:#ccff00; border:1px solid rgba(204,255,0,0.2);
+                                    @elseif($booking->status === 'pending') background:rgba(255,200,0,0.1); color:#ffc107; border:1px solid rgba(255,200,0,0.2);
+                                    @else background:rgba(255,255,255,0.05); color:#888; border:1px solid rgba(255,255,255,0.1); @endif">
+                                    {{ ucfirst($booking->status) }}
+                                </span>
+                            </td>
+                            <td style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
                                 @if($booking->status !== 'completed')
-                                    <form method="POST" action="{{ route('hub.bookings.destroy', $booking) }}" onsubmit="return confirm('Batalkan booking ini?');">
+                                    <form method="POST" action="{{ route('hub.bookings.destroy', $booking) }}" style="margin:0;" onsubmit="return confirm('Batalkan booking ini?');">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="admin-small-button admin-small-button--danger">Batal</button>
+                                        <button type="submit" class="hub-btn hub-btn--ghost" style="padding: 0.4rem 0.8rem; font-size: 0.7rem; color: #ff4757; border-color: rgba(255,71,87,0.3);">Batal</button>
                                     </form>
                                 @else
-                                    <span class="badge badge--neutral">Selesai</span>
+                                    <span style="font-size:0.7rem; padding:0.3rem 0.6rem; background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.5); border-radius:0.5rem; border:1px solid rgba(255,255,255,0.1);">Selesai</span>
                                 @endif
                             </td>
                         </tr>

@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             AdminSeeder::class,
             TrainerSeeder::class,
             DemoDataSeeder::class,
+            ProductSeeder::class,
         ]);
 
     }

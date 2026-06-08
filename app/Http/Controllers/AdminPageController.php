@@ -82,7 +82,21 @@ class AdminPageController extends Controller
             'last_backup' => ['status' => now()->subHours(12)->format('Today, h:i A'), 'latency' => '-', 'class' => 'success']
         ];
 
-        return view('admin.maintenance', compact('systemStatus'));
+        $isMaintenance = \Illuminate\Support\Facades\Storage::disk('local')->exists('maintenance_mode.txt');
+
+        return view('admin.maintenance', compact('systemStatus', 'isMaintenance'));
+    }
+
+    public function toggleMaintenance(Request $request)
+    {
+        $disk = \Illuminate\Support\Facades\Storage::disk('local');
+        if ($disk->exists('maintenance_mode.txt')) {
+            $disk->delete('maintenance_mode.txt');
+            return response()->json(['status' => 'off']);
+        } else {
+            $disk->put('maintenance_mode.txt', 'down');
+            return response()->json(['status' => 'on']);
+        }
     }
 
     public function approveSubscription($id)

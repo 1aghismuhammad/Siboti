@@ -40,6 +40,7 @@ class PersonalTrainerDashboardController extends Controller
             });
 
         $activeClients = Booking::where('trainer_id', $trainerId)
+            ->where('admin_approved', true)
             ->distinct('user_id')
             ->count('user_id');
 
@@ -127,6 +128,7 @@ class PersonalTrainerDashboardController extends Controller
                 $user = $booking->user;
                 $subscription = $user?->subscriptions()->where('status', 'active')->latest('end_date')->first();
                 return [
+                    'user_id' => $user?->id,
                     'name' => $user?->name ?? 'Guest',
                     'clientId' => sprintf('SBT-%04d', $user?->id ?? 0),
                     'package' => $subscription?->membershipPlan?->name ?? 'Membership',
@@ -245,7 +247,8 @@ class PersonalTrainerDashboardController extends Controller
             'progressHistory',
             'performanceSummaries',
             'activities',
-            'alerts'
+            'alerts',
+            'pendingCount'
         ));
     }
     public function updateBookingStatus(Request $request, Booking $booking)
@@ -264,6 +267,17 @@ class PersonalTrainerDashboardController extends Controller
         $booking->save();
 
         return back()->with('success', 'Status booking berhasil diperbarui.');
+    }
+
+    public function removeMember(Request $request, $userId)
+    {
+        $this->authorizeRole('trainer');
+        
+        Booking::where('trainer_id', Auth::id())
+            ->where('user_id', $userId)
+            ->update(['status' => 'cancelled', 'admin_approved' => false]);
+
+        return back()->with('success', 'Member berhasil dihapus dari daftar Anda.');
     }
     private function getStatusClass(string $status): string
     {

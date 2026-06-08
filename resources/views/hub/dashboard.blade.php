@@ -600,8 +600,15 @@
     <div class="hub-stats">
         @foreach($stats as $s)
         <div class="hub-stat-card">
-            <p class="hub-stat-card__label">{{ $s['label'] }}</p>
-            <p class="hub-stat-card__value">{{ $s['value'] }} <span class="hub-stat-card__unit">{{ $s['unit'] }}</span></p>
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                <div>
+                    <p class="hub-stat-card__label">{{ $s['label'] }}</p>
+                    <p class="hub-stat-card__value">{{ $s['value'] }} <span class="hub-stat-card__unit">{{ $s['unit'] }}</span></p>
+                </div>
+                <div style="width:36px; height:36px; border-radius:10px; background:rgba(204,255,0,0.1); color:#CCFF00; display:flex; align-items:center; justify-content:center; font-size:1.2rem;">
+                    @if(str_contains(strtolower($s['label']), 'sesi')) 🏋️ @elseif(str_contains(strtolower($s['label']), 'berat')) ⚖️ @else 📈 @endif
+                </div>
+            </div>
             <p class="hub-stat-card__change">{{ $s['change'] }}</p>
         </div>
         @endforeach

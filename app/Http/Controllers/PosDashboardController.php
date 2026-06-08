@@ -198,4 +198,33 @@ class PosDashboardController extends Controller
             'transaction' => $transaction
         ]);
     }
+
+    public function storeProduct(\Illuminate\Http\Request $request)
+    {
+        $this->authorizeRole('receptionist');
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'category' => 'required|string|max:255',
+            'price' => 'required|numeric|min:0',
+            'stock' => 'required|integer|min:0',
+        ]);
+
+        $code = 'PRD-' . strtoupper(substr(uniqid(), -5));
+
+        Product::create([
+            'code' => $code,
+            'name' => $request->name,
+            'category' => $request->category,
+            'description' => $request->description,
+            'price' => $request->price,
+            'stock' => $request->stock,
+            'badge' => 'Baru',
+            'badge_class' => 'success',
+            'icon' => 'inventory_2',
+            'sales_count' => 0,
+        ]);
+
+        return redirect()->route('pos.dashboard')->with('success', 'Produk berhasil ditambahkan.');
+    }
 }

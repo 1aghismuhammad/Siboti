@@ -78,6 +78,10 @@
                             <h2>Produk Gym</h2>
                             <p>Minuman & suplemen</p>
                         </div>
+                        <button type="button" class="admin-small-button" id="openAddProductModal">
+                            <span class="material-symbols-outlined" style="font-size:15px;">add</span>
+                            Tambah Produk
+                        </button>
                     </div>
 
                     <div class="admin-transaction-list" id="productList">
@@ -157,13 +161,55 @@
     </div>
 </div>
 
+{{-- MODAL TAMBAH PRODUK --}}
+<div id="addProductModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:999;align-items:center;justify-content:center;">
+    <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:16px;padding:32px;width:90%;max-width:400px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+            <h2 style="font-size:18px;font-weight:700;color:#e0e0e0;">Tambah Produk</h2>
+            <button type="button" id="closeAddProductModal" style="background:transparent;border:none;color:#888;cursor:pointer;">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <form action="{{ route('pos.product.store') }}" method="POST">
+            @csrf
+            <div style="margin-bottom:16px;">
+                <label style="display:block;margin-bottom:8px;font-size:13px;color:#ccc;">Nama Produk</label>
+                <input type="text" name="name" required style="width:100%;padding:10px;border-radius:8px;border:1px solid #333;background:#111;color:#fff;">
+            </div>
+            <div style="margin-bottom:16px;">
+                <label style="display:block;margin-bottom:8px;font-size:13px;color:#ccc;">Kategori</label>
+                <select name="category" required style="width:100%;padding:10px;border-radius:8px;border:1px solid #333;background:#111;color:#fff;">
+                    <option value="Minuman">Minuman</option>
+                    <option value="Makanan">Makanan</option>
+                    <option value="Suplemen">Suplemen</option>
+                    <option value="Lainnya">Lainnya</option>
+                </select>
+            </div>
+            <div style="margin-bottom:16px;">
+                <label style="display:block;margin-bottom:8px;font-size:13px;color:#ccc;">Deskripsi (Opsional)</label>
+                <input type="text" name="description" style="width:100%;padding:10px;border-radius:8px;border:1px solid #333;background:#111;color:#fff;">
+            </div>
+            <div style="display:flex;gap:16px;margin-bottom:24px;">
+                <div style="flex:1;">
+                    <label style="display:block;margin-bottom:8px;font-size:13px;color:#ccc;">Harga (Rp)</label>
+                    <input type="number" name="price" min="0" required style="width:100%;padding:10px;border-radius:8px;border:1px solid #333;background:#111;color:#fff;">
+                </div>
+                <div style="flex:1;">
+                    <label style="display:block;margin-bottom:8px;font-size:13px;color:#ccc;">Stok</label>
+                    <input type="number" name="stock" min="0" required style="width:100%;padding:10px;border-radius:8px;border:1px solid #333;background:#111;color:#fff;">
+                </div>
+            </div>
+            <button type="submit" class="admin-primary-button" style="width:100%;">Simpan Produk</button>
+        </form>
+    </div>
+</div>
 @push('scripts')
 <script>
 const cart = {};
 
 const products = {
     @foreach($products as $p)
-    {{ $p['id'] }}: { name: '{{ $p['name'] }}', price: {{ $p['price'] }}, stock: {{ $p['stock'] }} },
+    "{{ $p['id'] }}": { name: '{!! addslashes($p['name']) !!}', price: {{ $p['price'] }}, stock: {{ $p['stock'] }} },
     @endforeach
 };
 
@@ -199,10 +245,10 @@ function renderCart() {
             <div style="display:flex;justify-content:space-between;align-items:center;width:100%;">
                 <span style="font-size:13px;color:#ccc;">${p.name}</span>
                 <div style="display:flex;align-items:center;gap:10px;">
-                    <button type="button" onclick="changeQty(${id}, -1)"
+                    <button type="button" onclick="changeQty('${id}', -1)"
                         style="width:24px;height:24px;border-radius:6px;border:1px solid #333;background:#111;color:#ccc;cursor:pointer;font-size:14px;line-height:1;display:flex;align-items:center;justify-content:center;">−</button>
                     <span style="font-size:13px;font-weight:600;color:#e0e0e0;min-width:16px;text-align:center;">${qty}</span>
-                    <button type="button" onclick="changeQty(${id}, 1)"
+                    <button type="button" onclick="changeQty('${id}', 1)"
                         style="width:24px;height:24px;border-radius:6px;border:1px solid #333;background:#111;color:#ccc;cursor:pointer;font-size:14px;line-height:1;display:flex;align-items:center;justify-content:center;">+</button>
                     <strong style="color:#c6f135;min-width:72px;text-align:right;font-size:13px;">${formatRp(subtotal)}</strong>
                 </div>
@@ -293,7 +339,22 @@ document.getElementById('modalClose').addEventListener('click', () => {
     Object.keys(cart).forEach(k => delete cart[k]);
     renderCart();
 });
+
+document.getElementById('openAddProductModal').addEventListener('click', () => {
+    document.getElementById('addProductModal').style.display = 'flex';
+});
+
+document.getElementById('closeAddProductModal').addEventListener('click', () => {
+    document.getElementById('addProductModal').style.display = 'none';
+});
+
 </script>
 @endpush
+
+@if(session('success'))
+<script>
+    alert('{{ session('success') }}');
+</script>
+@endif
 
 @endsection

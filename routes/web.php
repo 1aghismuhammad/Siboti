@@ -100,6 +100,7 @@ Route::prefix('admin')->middleware(['auth', EnsureUserRole::class . ':admin'])->
     // Admin Actions
     Route::post('/subscriptions/{id}/approve', [\App\Http\Controllers\AdminPageController::class, 'approveSubscription'])->name('subscriptions.approve');
     Route::post('/bookings/{id}/forward', [\App\Http\Controllers\AdminPageController::class, 'forwardBooking'])->name('bookings.forward');
+    Route::post('/maintenance/toggle', [\App\Http\Controllers\AdminPageController::class, 'toggleMaintenance'])->name('maintenance.toggle');
     
     // Trainer CRUD
     Route::post('/trainers', [\App\Http\Controllers\AdminPageController::class, 'storeTrainer'])->name('trainers.store');
@@ -114,6 +115,10 @@ Route::get('/trainer/dashboard', PersonalTrainerDashboardController::class)
 Route::patch('/trainer/bookings/{booking}', [PersonalTrainerDashboardController::class, 'updateBookingStatus'])
     ->middleware(['auth', EnsureUserRole::class . ':trainer'])
     ->name('trainer.bookings.update');
+
+Route::delete('/trainer/members/{user_id}', [PersonalTrainerDashboardController::class, 'removeMember'])
+    ->middleware(['auth', EnsureUserRole::class . ':trainer'])
+    ->name('trainer.member.remove');
 
 Route::get('/receptionist/dashboard', ReceptionistDashboardController::class)
     ->middleware(['auth', EnsureUserRole::class . ':receptionist'])
@@ -130,6 +135,10 @@ Route::get('/pos/dashboard', PosDashboardController::class)
 Route::post('/pos/transaction', [PosDashboardController::class, 'store'])
     ->middleware(['auth', EnsureUserRole::class . ':receptionist'])
     ->name('pos.transaction.store');
+
+Route::post('/pos/products', [PosDashboardController::class, 'storeProduct'])
+    ->middleware(['auth', EnsureUserRole::class . ':receptionist'])
+    ->name('pos.product.store');
 
 Route::get('/pos/history', PosHistoryController::class)
     ->middleware('auth')

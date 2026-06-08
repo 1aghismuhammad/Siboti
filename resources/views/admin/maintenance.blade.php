@@ -140,10 +140,17 @@
 
                         {{-- Mode Maintenance --}}
                         <button type="button" id="btnMaintenance"
-                            style="display:flex;align-items:center;gap:1rem;background:rgba(255,71,87,0.03);border:1px solid rgba(255,71,87,0.2);padding:1rem;border-radius:14px;text-decoration:none;color:#ff4757;width:100%;cursor:pointer;transition:all 0.25s ease;font-family:inherit;text-align:left;">
+                            style="display:flex;align-items:center;gap:1rem;padding:1rem;border-radius:14px;text-decoration:none;width:100%;cursor:pointer;transition:all 0.25s ease;font-family:inherit;text-align:left; 
+                            @if($isMaintenance ?? false)
+                                background:rgba(255,71,87,0.1); border:1px solid rgba(255,71,87,0.4); color:#ff4757;
+                            @else
+                                background:rgba(255,71,87,0.03); border:1px solid rgba(255,71,87,0.2); color:#ff4757;
+                            @endif">
                             <span class="material-symbols-outlined" style="color:#ff4757;background:rgba(255,71,87,0.1);padding:0.5rem;border-radius:10px;font-size:1.4rem;">power_settings_new</span>
                             <div style="flex:1;">
-                                <strong style="font-size:0.875rem;display:block;" id="maintenanceBtnLabel">Aktifkan Mode Maintenance</strong>
+                                <strong style="font-size:0.875rem;display:block;" id="maintenanceBtnLabel">
+                                    {{ ($isMaintenance ?? false) ? 'Nonaktifkan Mode Maintenance' : 'Aktifkan Mode Maintenance' }}
+                                </strong>
                                 <small style="color:#ff475799;font-size:0.75rem;">Sistem akan tidak dapat diakses user</small>
                             </div>
                             <span class="material-symbols-outlined" style="color:#ff4757;font-size:1.2rem;">chevron_right</span>
@@ -164,7 +171,7 @@
 </style>
 
 <script>
-let maintenanceMode = false;
+let maintenanceMode = {{ ($isMaintenance ?? false) ? 'true' : 'false' }};
 
 function showToast(message, type = 'success') {
     const colors = {
@@ -247,22 +254,41 @@ document.getElementById('btnClearCache').addEventListener('click', function() {
 });
 
 // ── Mode Maintenance Toggle
-document.getElementById('btnMaintenance').addEventListener('click', function() {
-    maintenanceMode = !maintenanceMode;
+document.getElementById('btnMaintenance').addEventListener('click', async function() {
+    const btn = this;
     const label = document.getElementById('maintenanceBtnLabel');
+    btn.style.opacity = '0.6';
+    btn.style.pointerEvents = 'none';
 
-    if (maintenanceMode) {
-        label.textContent = 'Nonaktifkan Mode Maintenance';
-        this.style.background = 'rgba(255,71,87,0.1)';
-        this.style.borderColor = 'rgba(255,71,87,0.4)';
-        addLog('⚠ Mode Maintenance DIAKTIFKAN');
-        showToast('Mode Maintenance aktif — sistem tidak dapat diakses user', 'danger');
-    } else {
-        label.textContent = 'Aktifkan Mode Maintenance';
-        this.style.background = 'rgba(255,71,87,0.03)';
-        this.style.borderColor = 'rgba(255,71,87,0.2)';
-        addLog('✓ Mode Maintenance DINONAKTIFKAN');
-        showToast('Mode Maintenance dinonaktifkan — sistem kembali normal', 'success');
+    try {
+        const res = await fetch('{{ route("admin.maintenance.toggle") }}', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            }
+        });
+        const data = await res.json();
+        maintenanceMode = (data.status === 'on');
+
+        if (maintenanceMode) {
+            label.textContent = 'Nonaktifkan Mode Maintenance';
+            btn.style.background = 'rgba(255,71,87,0.1)';
+            btn.style.borderColor = 'rgba(255,71,87,0.4)';
+            addLog('⚠ Mode Maintenance DIAKTIFKAN');
+            showToast('Mode Maintenance aktif — sistem tidak dapat diakses user', 'danger');
+        } else {
+            label.textContent = 'Aktifkan Mode Maintenance';
+            btn.style.background = 'rgba(255,71,87,0.03)';
+            btn.style.borderColor = 'rgba(255,71,87,0.2)';
+            addLog('✓ Mode Maintenance DINONAKTIFKAN');
+            showToast('Mode Maintenance dinonaktifkan — sistem kembali normal', 'success');
+        }
+    } catch (e) {
+        showToast('Gagal mengubah mode maintenance', 'danger');
+    } finally {
+        btn.style.opacity = '1';
+        btn.style.pointerEvents = 'auto';
     }
 });
 
