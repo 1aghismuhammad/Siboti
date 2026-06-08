@@ -237,61 +237,6 @@
                 @endforeach
             </section>
 
-            {{-- CHARTS --}}
-            <section class="admin-grid admin-grid--two">
-                <article class="admin-card">
-                    <div class="admin-section-head">
-                        <div>
-                            <h2>Pertumbuhan Membership Bulanan</h2>
-                            <p id="chartSubtitle">Januari sampai Juni 2026</p>
-                        </div>
-                        <div style="display:flex;gap:8px;">
-                            <button type="button" class="admin-small-button chart-filter" data-range="6">6 Bulan</button>
-                            <button type="button" class="admin-small-button chart-filter" data-range="3">3 Bulan</button>
-                            <button type="button" class="admin-small-button chart-filter" data-range="1">1 Bulan</button>
-                        </div>
-                    </div>
-                    <div class="admin-line-chart">
-                        <svg id="lineChart" viewBox="0 0 600 220" preserveAspectRatio="none">
-                            <defs>
-                                <linearGradient id="lineArea" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stop-color="#ccff00" stop-opacity="0.28"/>
-                                    <stop offset="100%" stop-color="#ccff00" stop-opacity="0"/>
-                                </linearGradient>
-                            </defs>
-                            <path id="chartArea" d="M0 180 L120 150 L240 85 L360 110 L480 55 L600 32 L600 220 L0 220 Z" fill="url(#lineArea)"/>
-                            <path id="chartLine" d="M0 180 L120 150 L240 85 L360 110 L480 55 L600 32" fill="none" stroke="#ccff00" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-                            <circle cx="120" cy="150" r="6"/><circle cx="240" cy="85" r="6"/>
-                            <circle cx="360" cy="110" r="6"/><circle cx="480" cy="55" r="6"/>
-                        </svg>
-                    </div>
-                </article>
-
-                <article class="admin-card">
-                    <div class="admin-section-head">
-                        <div>
-                            <h2>Aktivitas Booking & Check-in</h2>
-                            <p>7 hari terakhir</p>
-                        </div>
-                        <button type="button" class="admin-small-button" id="refreshChart">
-                            <span class="material-symbols-outlined" style="font-size:14px;vertical-align:-2px;">refresh</span>
-                            Refresh
-                        </button>
-                    </div>
-                    <div class="admin-bar-chart" id="barChart">
-                        @foreach ([60,70,45,80,55,90,75] as $height)
-                        <div class="admin-bar-chart__group">
-                            <span class="admin-bar admin-bar--muted" style="height:{{ max($height-18,25) }}%"></span>
-                            <span class="admin-bar admin-bar--neon" style="height:{{ $height }}%"></span>
-                        </div>
-                        @endforeach
-                    </div>
-                    <div class="admin-chart-legend">
-                        <span><i class="legend-muted"></i>Booking</span>
-                        <span><i class="legend-neon"></i>Check-in</span>
-                    </div>
-                </article>
-            </section>
 
             {{-- TABLE BOOKING --}}
             <section id="booking-terbaru" class="admin-card admin-table-card">
@@ -341,21 +286,28 @@
                         </div>
                     </div>
                     <div class="admin-progress-list">
+                        @php
+                            $totalSubs = \App\Models\Subscription::count() ?: 1;
+                            $activeSubs = \App\Models\Subscription::where('status','active')->count();
+                            $pendingSubs = \App\Models\Subscription::where('status','pending')->count();
+                            $expiredSubs = \App\Models\Subscription::where('status','expired')->count();
+                            $cancelledSubs = \App\Models\Subscription::where('status','cancelled')->count();
+                        @endphp
                         <div class="admin-progress-item">
-                            <div><span>Aktif</span><strong>75%</strong></div>
-                            <progress max="100" value="75"></progress>
+                            <div><span>Aktif</span><strong>{{ $activeSubs }}</strong></div>
+                            <progress max="100" value="{{ ($activeSubs/$totalSubs)*100 }}"></progress>
                         </div>
                         <div class="admin-progress-item">
-                            <div><span>Approved</span><strong>{{ \App\Models\Booking::where('status','approved')->count() }}</strong></div>
-                            <progress max="100" value="{{ min(100,\App\Models\Booking::where('status','approved')->count()*10) }}"></progress>
+                            <div><span>Pending</span><strong>{{ $pendingSubs }}</strong></div>
+                            <progress max="100" value="{{ ($pendingSubs/$totalSubs)*100 }}"></progress>
                         </div>
-                        <div class="admin-progress-item admin-progress-item--danger">
-                            <div><span>Pending</span><strong>{{ \App\Models\Booking::where('status','pending')->count() }}</strong></div>
-                            <progress max="100" value="{{ min(100,\App\Models\Booking::where('status','pending')->count()*10) }}"></progress>
+                        <div class="admin-progress-item admin-progress-item--warning">
+                            <div><span>Expired</span><strong>{{ $expiredSubs }}</strong></div>
+                            <progress max="100" value="{{ ($expiredSubs/$totalSubs)*100 }}"></progress>
                         </div>
                         <div class="admin-progress-item admin-progress-item--muted">
-                            <div><span>Cancelled</span><strong>{{ \App\Models\Booking::where('status','cancelled')->count() }}</strong></div>
-                            <progress max="100" value="{{ min(100,\App\Models\Booking::where('status','cancelled')->count()*10) }}"></progress>
+                            <div><span>Cancelled</span><strong>{{ $cancelledSubs }}</strong></div>
+                            <progress max="100" value="{{ ($cancelledSubs/$totalSubs)*100 }}"></progress>
                         </div>
                     </div>
                 </article>
@@ -495,39 +447,6 @@ function showToast(message, type = 'success') {
     setTimeout(() => { t.style.animation = 'slideOut 0.3s ease forwards'; setTimeout(() => t.remove(), 300); }, 3000);
 }
 
-// ── Filter Chart
-const chartData = {
-    6: { area:'M0 180 L120 150 L240 85 L360 110 L480 55 L600 32 L600 220 L0 220 Z', line:'M0 180 L120 150 L240 85 L360 110 L480 55 L600 32', label:'Januari sampai Juni 2026' },
-    3: { area:'M0 120 L300 80 L600 40 L600 220 L0 220 Z', line:'M0 120 L300 80 L600 40', label:'April sampai Juni 2026' },
-    1: { area:'M0 100 L200 70 L400 90 L600 50 L600 220 L0 220 Z', line:'M0 100 L200 70 L400 90 L600 50', label:'Juni 2026' },
-};
-document.querySelectorAll('.chart-filter').forEach(btn => {
-    btn.addEventListener('click', function() {
-        const range = this.dataset.range;
-        const d = chartData[range];
-        document.getElementById('chartArea').setAttribute('d', d.area);
-        document.getElementById('chartLine').setAttribute('d', d.line);
-        document.getElementById('chartSubtitle').textContent = d.label;
-        document.querySelectorAll('.chart-filter').forEach(b => b.style.borderColor = '');
-        this.style.borderColor = '#ccff00';
-        this.style.color = '#ccff00';
-        showToast(`Menampilkan data ${d.label}`, 'info');
-    });
-});
-
-// ── Refresh Bar Chart
-document.getElementById('refreshChart').addEventListener('click', function() {
-    const bars = document.querySelectorAll('#barChart .admin-bar--neon');
-    bars.forEach(bar => {
-        const h = Math.floor(Math.random() * 60) + 30;
-        bar.style.height = h + '%';
-    });
-    document.querySelectorAll('#barChart .admin-bar--muted').forEach(bar => {
-        const h = Math.floor(Math.random() * 40) + 20;
-        bar.style.height = h + '%';
-    });
-    showToast('Data aktivitas diperbarui', 'info');
-});
 
 // ── Refresh Activity
 document.getElementById('refreshActivity').addEventListener('click', function() {

@@ -25,10 +25,9 @@
                     <li class="paket-card__feature"><span class="paket-card__feature-check">✓</span> 1 sesi konsultasi trainer</li>
                 </ul>
                 <a 
-                    href="https://wa.me/6281234567890" 
+                    href="{{ auth()->check() ? route('hub.membership.buy', 1) : route('login') }}" 
                     class="btn-outline" 
-                    style="display:block;text-align:center;"
-                    target="_blank">
+                    style="display:block;text-align:center;">
                     PILIH PAKET
                 </a>
                 
@@ -46,10 +45,9 @@
                     <li class="paket-card__feature"><span class="paket-card__feature-check">✓</span> Body composition analysis</li>
                 </ul>
                 <a 
-                    href="https://wa.me/6281234567890" 
+                    href="{{ auth()->check() ? route('hub.membership.buy', 2) : route('login') }}" 
                     class="btn-outline" 
-                    style="display:block;text-align:center;"
-                    target="_blank">
+                    style="display:block;text-align:center;">
                     PILIH PAKET
                 </a>
 
@@ -66,10 +64,9 @@
                     <li class="paket-card__feature"><span class="paket-card__feature-check">✓</span> Tamu +1 setiap sesi</li>
                 </ul>
                 <a 
-                    href="https://wa.me/6281234567890" 
+                    href="{{ auth()->check() ? route('hub.membership.buy', 3) : route('login') }}" 
                     class="btn-outline" 
-                    style="display:block;text-align:center;"
-                    target="_blank">
+                    style="display:block;text-align:center;">
                     PILIH PAKET
                 </a>
             </div>

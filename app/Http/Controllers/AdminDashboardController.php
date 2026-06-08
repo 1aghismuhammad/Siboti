@@ -13,6 +13,8 @@ class AdminDashboardController extends Controller
 {
     public function __invoke(): View
     {
+        $this->authorizeRole('admin');
+
         $activeMembers = Subscription::where('status', 'active')
             ->whereDate('end_date', '>=', Carbon::today())
             ->distinct('user_id')
@@ -57,14 +59,14 @@ class AdminDashboardController extends Controller
             ],
         ];
 
-        $bookings = Booking::with('user')
+        $bookings = Booking::with(['user', 'trainer'])
             ->orderByDesc('booking_date')
             ->limit(5)
             ->get()
             ->map(function (Booking $booking) {
                 return [
                     'member' => $booking->user?->name ?? 'Guest',
-                    'trainer' => '-',
+                    'trainer' => $booking->trainer?->name ?? '-',
                     'session' => $booking->session_type,
                     'date' => $booking->booking_date?->format('d M Y') ?? '-',
                     'time' => substr($booking->booking_time, 0, 5),

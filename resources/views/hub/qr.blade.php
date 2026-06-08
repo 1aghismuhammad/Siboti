@@ -527,8 +527,8 @@
                         <rect x="11" y="17" width="1" height="3" fill="black"/>
                     </svg>
                 </div>
-                <p class="qr-card__name">BUDI SANTOSO</p>
-                <p class="qr-card__meta">ID: GZ-08421 · PAKET PRO</p>
+                <p class="qr-card__name">{{ strtoupper($user->name) }}</p>
+                <p class="qr-card__meta">ID: {{ $memberId }} · {{ strtoupper($paketAktif) }}</p>
                 <p class="qr-card__status">
                     <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="5" fill="#16a34a"/></svg>
                     QR Aktif & Valid
@@ -542,32 +542,34 @@
                 <p class="hub-card__title">Riwayat Check-in</p>
             </div>
             <div class="riwayat-list">
-                @foreach([
-                    ['Aman & Pribadi','QR code valid pagi ini. Tidak bisa dipakai ulang dan kedaluwarsa otomatis.',[]],
-                    ['Riwayat Check-in','3 check-in terakhir',[
-                        ['Hari Ini','Pagi (Sabtu)','06.45'],
-                        ['Kemarin','Pagi (Jumat)','07.21'],
-                        ['3 Hari Lalu','Siang (Rabu)','09.05'],
-                    ]],
-                ] as $item)
                 <div class="riwayat-item">
                     <div class="riwayat-item__header">
                         <div class="riwayat-item__dot"></div>
-                        <p class="riwayat-item__title">{{ $item[0] }}</p>
+                        <p class="riwayat-item__title">Aman & Pribadi</p>
                     </div>
-                    <p class="riwayat-item__desc">{{ $item[1] }}</p>
-                    @if(count($item[2]) > 0)
+                    <p class="riwayat-item__desc">QR code valid. Tidak bisa dipakai ulang dan kedaluwarsa otomatis.</p>
+                </div>
+
+                <div class="riwayat-item">
+                    <div class="riwayat-item__header">
+                        <div class="riwayat-item__dot"></div>
+                        <p class="riwayat-item__title">Riwayat Check-in</p>
+                    </div>
+                    <p class="riwayat-item__desc">Riwayat check-in gym terakhir kamu.</p>
+                    
+                    @if(count($checkins) > 0)
                     <div class="riwayat-item__rows">
-                        @foreach($item[2] as $row)
+                        @foreach($checkins as $row)
                         <div class="riwayat-row">
-                            <span>{{ $row[0] }} · {{ $row[1] }}</span>
-                            <span>{{ $row[2] }}</span>
+                            <span>{{ $row['when'] }} · {{ $row['period'] }} ({{ $row['day'] }})</span>
+                            <span>{{ $row['time'] }}</span>
                         </div>
                         @endforeach
                     </div>
+                    @else
+                    <p style="padding-left: 1.1rem; color: rgba(255,255,255,0.4); font-size: 0.75rem; margin-top: 0.5rem;">Belum ada riwayat check-in.</p>
                     @endif
                 </div>
-                @endforeach
             </div>
         </div>
     </div>

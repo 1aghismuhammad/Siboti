@@ -598,26 +598,13 @@
     </div>
     {{-- STATS --}}
     <div class="hub-stats">
+        @foreach($stats as $s)
         <div class="hub-stat-card">
-            <p class="hub-stat-card__label">Sisa Sesi</p>
-            <p class="hub-stat-card__value">14 <span class="hub-stat-card__unit">hari</span></p>
-            <p class="hub-stat-card__change">Aktif hingga 30 Jun</p>
+            <p class="hub-stat-card__label">{{ $s['label'] }}</p>
+            <p class="hub-stat-card__value">{{ $s['value'] }} <span class="hub-stat-card__unit">{{ $s['unit'] }}</span></p>
+            <p class="hub-stat-card__change">{{ $s['change'] }}</p>
         </div>
-        <div class="hub-stat-card">
-            <p class="hub-stat-card__label">Total Sesi</p>
-            <p class="hub-stat-card__value">42 <span class="hub-stat-card__unit">sesi</span></p>
-            <p class="hub-stat-card__change">+3 minggu ini</p>
-        </div>
-        <div class="hub-stat-card">
-            <p class="hub-stat-card__label">Hari Aktif Ini</p>
-            <p class="hub-stat-card__value">18 <span class="hub-stat-card__unit">hr</span></p>
-            <p class="hub-stat-card__change">+2 dari bulan lalu</p>
-        </div>
-        <div class="hub-stat-card">
-            <p class="hub-stat-card__label">Kalori</p>
-            <p class="hub-stat-card__value">12.4 <span class="hub-stat-card__unit">kcal</span></p>
-            <p class="hub-stat-card__change">Bulan ini</p>
-        </div>
+        @endforeach
     </div>
     {{-- CONTENT GRID --}}
     <div class="hub-content-grid">
@@ -629,23 +616,21 @@
                     <p class="hub-card__title">Jadwal Mendatang</p>
                     <a href="#" class="hub-card__link">Lihat semua →</a>
                 </div>
-                @foreach([
-                    ['Sen','26','Strength & Conditioning','07.00 – 09.00 · Coach Dimas'],
-                    ['Rab','28','HIIT Cardio Session','16.00 – 17.00 · Coach Yanu'],
-                    ['Jum','30','Personal Training','09.00 – 11.00 · Coach Raya'],
-                ] as $jadwal)
+                @forelse($upcomingBookings as $jadwal)
                 <div class="jadwal-item">
                     <div class="jadwal-item__date">
-                        <span class="jadwal-item__day">{{ $jadwal[0] }}</span>
-                        <span class="jadwal-item__num">{{ $jadwal[1] }}</span>
+                        <span class="jadwal-item__day">{{ $jadwal['day'] }}</span>
+                        <span class="jadwal-item__num">{{ $jadwal['date'] }}</span>
                     </div>
                     <div class="jadwal-item__info">
-                        <p class="jadwal-item__name">{{ $jadwal[2] }}</p>
-                        <p class="jadwal-item__time">{{ $jadwal[3] }}</p>
+                        <p class="jadwal-item__name">{{ $jadwal['type'] }}</p>
+                        <p class="jadwal-item__time">{{ $jadwal['time_coach'] }}</p>
                     </div>
                     <span class="jadwal-item__arrow">›</span>
                 </div>
-                @endforeach
+                @empty
+                <p style="padding: 1rem; color: rgba(255,255,255,0.4); text-align: center; font-size: 0.8rem;">Belum ada jadwal booking yang disetujui.</p>
+                @endforelse
             </div>
             {{-- Aktivitas --}}
             <div class="hub-card">
@@ -654,17 +639,15 @@
                     <a href="{{ url('/hub/progress') }}" class="hub-card__link">Lihat progress →</a>
                 </div>
                 <div class="aktivitas-grid">
-                    @foreach([
-                        ['Kemarin','Bench Press','80 kg × 10'],
-                        ['2 Hari Lalu','Treadmill','5.2 km · 28 min'],
-                        ['3 Hari Lalu','Squat','100 kg × 8'],
-                    ] as $akt)
+                    @forelse($recentActivities as $akt)
                     <div class="aktivitas-item">
-                        <p class="aktivitas-item__when">{{ $akt[0] }}</p>
-                        <p class="aktivitas-item__name">{{ $akt[1] }}</p>
-                        <p class="aktivitas-item__detail">{{ $akt[2] }}</p>
+                        <p class="aktivitas-item__when">{{ $akt['when'] }}</p>
+                        <p class="aktivitas-item__name">{{ $akt['name'] }}</p>
+                        <p class="aktivitas-item__detail">{{ $akt['detail'] }}</p>
                     </div>
-                    @endforeach
+                    @empty
+                    <p style="grid-column: 1 / -1; color: rgba(255,255,255,0.4); font-size: 0.8rem;">Belum ada progress dicatat.</p>
+                    @endforelse
                 </div>
             </div>
         </div>
@@ -672,20 +655,16 @@
         <div class="hub-content-col">
             <div class="paket-aktif">
                 <p class="paket-aktif__label">Membership Aktif</p>
-                <p class="paket-aktif__name">Paket Pro</p>
-                <p class="paket-aktif__desc">Akses penuh 1 – 4 sesi personal training per bulan.</p>
+                <p class="paket-aktif__name">{{ $paketAktif }}</p>
+                <p class="paket-aktif__desc">Berlatih maksimal dengan pendampingan personal trainer.</p>
                 <div class="paket-aktif__info">
                     <div class="paket-aktif__info-row">
                         <span>Berlaku hingga</span>
-                        <span>30 Jun 2026</span>
-                    </div>
-                    <div class="paket-aktif__info-row">
-                        <span>Sesi terpakai</span>
-                        <span>3 / 4</span>
+                        <span>{{ $berlakuHingga }}</span>
                     </div>
                     <div class="paket-aktif__info-row">
                         <span>ID Member</span>
-                        <span>GZ-08421</span>
+                        <span>{{ sprintf('GZ-%05d', $userId) }}</span>
                     </div>
                 </div>
             </div>

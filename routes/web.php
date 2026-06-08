@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\HubBookingController;
+use App\Http\Controllers\HubDashboardController;
+use App\Http\Controllers\HubProgressController;
 use App\Http\Controllers\PersonalTrainerDashboardController;
 use App\Http\Controllers\PosDashboardController;
 use App\Http\Controllers\PosHistoryController;
@@ -51,52 +54,77 @@ Route::get('/dashboard', function () {
     // Member dashboard (simple placeholder)
     Route::get('/member/dashboard', function () {
         return view('member.dashboard');
-    })->middleware('auth')->name('member.dashboard');
+    })->middleware(['auth', EnsureUserRole::class . ':member'])->name('member.dashboard');
 
 // SibotiHUB
-Route::get('/hub/dashboard', function () {
-    return view('hub.dashboard');
-});
+Route::get('/hub/dashboard', [HubDashboardController::class, 'dashboard'])
+    ->middleware(['auth', EnsureUserRole::class . ':member'])
+    ->name('hub.dashboard');
 
-Route::get('/hub/qr', function () {
-    return view('hub.qr');
-});
+Route::get('/hub/qr', [HubDashboardController::class, 'qr'])
+    ->middleware(['auth', EnsureUserRole::class . ':member'])
+    ->name('hub.qr');
 
-Route::get('/hub/progress', function () {
-    return view('hub.progress');
-});
+Route::get('/hub/progress', [HubProgressController::class, 'index'])
+    ->middleware(['auth', EnsureUserRole::class . ':member'])
+    ->name('hub.progress');
 
-Route::get('/hub/booking', function () {
-    return view('hub.booking');
-});
+Route::get('/hub/booking', [HubBookingController::class, 'index'])
+    ->middleware(['auth', EnsureUserRole::class . ':member'])
+    ->name('hub.booking');
+
+Route::post('/hub/bookings', [HubBookingController::class, 'store'])
+    ->middleware(['auth', EnsureUserRole::class . ':member'])
+    ->name('hub.bookings.store');
+
+Route::delete('/hub/bookings/{booking}', [HubBookingController::class, 'destroy'])
+    ->middleware(['auth', EnsureUserRole::class . ':member'])
+    ->name('hub.bookings.destroy');
+
+Route::get('/hub/membership/{plan_id}/buy', [\App\Http\Controllers\HubMembershipController::class, 'buy'])
+    ->middleware(['auth', EnsureUserRole::class . ':member'])
+    ->name('hub.membership.buy');
 
 // Admin / Role dashboards (use controllers)
 Route::get('/admin/dashboard', AdminDashboardController::class)
-    ->middleware('auth')
+    ->middleware(['auth', EnsureUserRole::class . ':admin'])
     ->name('admin.dashboard');
 
-Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
+Route::prefix('admin')->middleware(['auth', EnsureUserRole::class . ':admin'])->name('admin.')->group(function () {
     Route::get('/memberships', [\App\Http\Controllers\AdminPageController::class, 'memberships'])->name('memberships');
     Route::get('/trainers', [\App\Http\Controllers\AdminPageController::class, 'trainers'])->name('trainers');
     Route::get('/bookings', [\App\Http\Controllers\AdminPageController::class, 'bookings'])->name('bookings');
     Route::get('/reports', [\App\Http\Controllers\AdminPageController::class, 'reports'])->name('reports');
     Route::get('/maintenance', [\App\Http\Controllers\AdminPageController::class, 'maintenance'])->name('maintenance');
+    
+    // Admin Actions
+    Route::post('/subscriptions/{id}/approve', [\App\Http\Controllers\AdminPageController::class, 'approveSubscription'])->name('subscriptions.approve');
+    Route::post('/bookings/{id}/forward', [\App\Http\Controllers\AdminPageController::class, 'forwardBooking'])->name('bookings.forward');
+    
+    // Trainer CRUD
+    Route::post('/trainers', [\App\Http\Controllers\AdminPageController::class, 'storeTrainer'])->name('trainers.store');
+    Route::put('/trainers/{id}', [\App\Http\Controllers\AdminPageController::class, 'updateTrainer'])->name('trainers.update');
+    Route::delete('/trainers/{id}', [\App\Http\Controllers\AdminPageController::class, 'destroyTrainer'])->name('trainers.destroy');
 });
 
 Route::get('/trainer/dashboard', PersonalTrainerDashboardController::class)
-    ->middleware('auth')
+    ->middleware(['auth', EnsureUserRole::class . ':trainer'])
     ->name('trainer.dashboard');
 
+Route::patch('/trainer/bookings/{booking}', [PersonalTrainerDashboardController::class, 'updateBookingStatus'])
+    ->middleware(['auth', EnsureUserRole::class . ':trainer'])
+    ->name('trainer.bookings.update');
+
 Route::get('/receptionist/dashboard', ReceptionistDashboardController::class)
-    ->middleware('auth')
+    ->middleware(['auth', EnsureUserRole::class . ':receptionist'])
     ->name('receptionist.dashboard');
 
 Route::get('/scan-qr', ScanQrPageController::class)
-    ->middleware('auth')
+    ->middleware(['auth', EnsureUserRole::class . ':receptionist'])
     ->name('scan-qr.index');
 
 Route::get('/pos/dashboard', PosDashboardController::class)
-    ->middleware('auth')
+    ->middleware(['auth', EnsureUserRole::class . ':receptionist'])
     ->name('pos.dashboard');
 
 Route::get('/pos/history', PosHistoryController::class)
@@ -104,7 +132,7 @@ Route::get('/pos/history', PosHistoryController::class)
     ->name('pos.history');
 
 Route::get('/reports', ReportPageController::class)
-    ->middleware('auth')
+    ->middleware(['auth', EnsureUserRole::class . ':admin'])
     ->name('reports.index');
 
 // Trainer Panel (legacy views for trainer auth/register pages)
@@ -113,11 +141,7 @@ Route::get('/trainer/login', [AuthenticatedSessionController::class, 'create'])
     ->name('trainer.login');
 Route::post('/trainer/login', [AuthenticatedSessionController::class, 'store']);
 
-Route::get('/scan-qr', ScanQrPageController::class)
-    ->middleware('auth')
-    ->name('scan-qr.index');
-
 // Tambahkan ini
 Route::post('/scan-qr/checkin', [ScanQrPageController::class, 'checkin'])
-    ->middleware('auth')
+    ->middleware(['auth', EnsureUserRole::class . ':receptionist'])
     ->name('scan-qr.checkin');

@@ -6,24 +6,45 @@ use App\Models\Booking;
 use App\Models\Checkin;
 use App\Models\ProgressRecord;
 use App\Models\Subscription;
+use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Validation\Rule;
 use Illuminate\View\View;
 
 class PersonalTrainerDashboardController extends Controller
 {
     public function __invoke(): View
     {
+        $this->authorizeRole('trainer');
+
+        $trainerId = Auth::id();
+
         $todaySchedules = Booking::with('user')
+            ->where('trainer_id', $trainerId)
+            ->where('admin_approved', true)
             ->whereDate('booking_date', Carbon::today())
             ->orderBy('booking_time')
-            ->get();
+            ->get()
+            ->map(function (Booking $booking) {
+                return [
+                    'member' => $booking->user?->name ?? 'Guest',
+                    'start' => substr($booking->booking_time, 0, 5),
+                    'end' => Carbon::parse($booking->booking_time)->addHour()->format('H:i'),
+                    'program' => $booking->session_type ?? 'Personal Training',
+                    'focus' => 'Sesi Latihan',
+                    'status' => $this->normalizeBookingStatus($booking->status),
+                    'statusClass' => $this->getStatusClass($booking->status),
+                    'initials' => $this->getInitials($booking->user?->name ?? 'GM'),
+                ];
+            });
 
-        $activeClients = Subscription::where('status', 'active')
-            ->whereDate('end_date', '>=', Carbon::today())
+        $activeClients = Booking::where('trainer_id', $trainerId)
             ->distinct('user_id')
             ->count('user_id');
 
-        $bookingsThisWeek = Booking::whereBetween('booking_date', [Carbon::today()->startOfWeek(), Carbon::today()->endOfWeek()])
+        $bookingsThisWeek = Booking::where('trainer_id', $trainerId)
+            ->whereBetween('booking_date', [Carbon::today()->startOfWeek(), Carbon::today()->endOfWeek()])
             ->count();
 
         $progressCount = ProgressRecord::count();
@@ -60,26 +81,32 @@ class PersonalTrainerDashboardController extends Controller
         ];
 
         $recentBookings = Booking::with('user')
+            ->where('trainer_id', $trainerId)
+            ->where('admin_approved', true)
             ->latest('booking_date')
             ->limit(3)
             ->get()
             ->map(function (Booking $booking) {
                 return [
+                    'id' => $booking->id,
                     'member' => $booking->user?->name ?? 'Guest',
                     'membership' => ucfirst($booking->status),
                     'time' => $booking->booking_date->format('d M Y') . ', ' . substr($booking->booking_time, 0, 5),
-                    'status' => $booking->status === 'pending' ? 'Menunggu' : 'Confirmed',
-                    'statusClass' => $booking->status === 'pending' ? 'warning' : 'success',
+                    'status' => $booking->status === 'pending' ? 'Menunggu' : ucfirst($booking->status),
+                    'statusClass' => $booking->status === 'pending' ? 'warning' : ($booking->status === 'approved' ? 'success' : 'danger'),
                 ];
             })
             ->toArray();
 
         $bookings = Booking::with('user')
+            ->where('trainer_id', $trainerId)
+            ->where('admin_approved', true)
             ->latest('booking_date')
             ->limit(4)
             ->get()
             ->map(function (Booking $booking) {
                 return [
+                    'id' => $booking->id,
                     'member' => $booking->user?->name ?? 'Guest',
                     'program' => $booking->session_type,
                     'dateTime' => $booking->booking_date->format('d M Y') . ', ' . substr($booking->booking_time, 0, 5),
@@ -90,20 +117,21 @@ class PersonalTrainerDashboardController extends Controller
             })
             ->toArray();
 
-        $clients = Subscription::with('user', 'membershipPlan')
-            ->where('status', 'active')
-            ->whereDate('end_date', '>=', Carbon::today())
-            ->latest('end_date')
-            ->limit(3)
+        $clients = Booking::with('user')
+            ->where('trainer_id', $trainerId)
+            ->where('admin_approved', true)
+            ->latest('booking_date')
             ->get()
-            ->map(function (Subscription $subscription) {
-                $user = $subscription->user;
+            ->unique('user_id')
+            ->map(function (Booking $booking) {
+                $user = $booking->user;
+                $subscription = $user?->subscriptions()->where('status', 'active')->latest('end_date')->first();
                 return [
                     'name' => $user?->name ?? 'Guest',
                     'clientId' => sprintf('SBT-%04d', $user?->id ?? 0),
-                    'package' => $subscription->membershipPlan?->name ?? 'Membership',
+                    'package' => $subscription?->membershipPlan?->name ?? 'Membership',
                     'remainingLabel' => 'Sisa Hari',
-                    'remaining' => Carbon::today()->diffInDays($subscription->end_date, false) . ' Hari',
+                    'remaining' => $subscription ? Carbon::today()->diffInDays($subscription->end_date, false) . ' Hari' : 'Tidak aktif',
                     'statusClass' => 'success',
                     'initials' => $this->getInitials($user?->name ?? 'GM'),
                 ];
@@ -112,24 +140,49 @@ class PersonalTrainerDashboardController extends Controller
 
         $progressHistory = ProgressRecord::with('user')
             ->latest()
-            ->limit(3)
+            ->limit(10)
             ->get()
             ->map(function (ProgressRecord $record) {
                 return [
+                    'id' => $record->id,
                     'member' => $record->user?->name ?? 'Guest',
-                    'time' => $record->created_at->diffForHumans(),
+                    'time' => $record->created_at->format('d M Y'),
                     'weight' => $record->weight ? number_format($record->weight, 1, ',', '.') . ' kg' : '-',
-                    'waist' => $record->height ? number_format($record->height, 1, ',', '.') . ' cm' : '-',
+                    'height' => $record->height ? number_format($record->height, 1, ',', '.') . ' cm' : '-',
+                    'muscle_mass' => $record->muscle_mass ? number_format($record->muscle_mass, 1, ',', '.') . ' kg' : '-',
+                    'fat_percentage' => $record->fat_percentage ? number_format($record->fat_percentage, 1, ',', '.') . ' %' : '-',
+                    'notes' => $record->notes ?? '-',
                 ];
             })
             ->toArray();
 
+        $approvedCount = Booking::where('trainer_id', $trainerId)->where('status', 'approved')->count();
+        $pendingCount = Booking::where('trainer_id', $trainerId)->where('status', 'pending')->count();
+        $completedCount = Booking::where('trainer_id', $trainerId)->where('status', 'completed')->count();
+        $totalBookings = max($approvedCount + $pendingCount + $completedCount, 1);
+
+        // Month-over-Month comparison
+        $thisMonthCompleted = Booking::where('trainer_id', $trainerId)
+            ->where('status', 'completed')
+            ->whereMonth('booking_date', Carbon::now()->month)
+            ->whereYear('booking_date', Carbon::now()->year)
+            ->count();
+        $lastMonthCompleted = Booking::where('trainer_id', $trainerId)
+            ->where('status', 'completed')
+            ->whereMonth('booking_date', Carbon::now()->subMonth()->month)
+            ->whereYear('booking_date', Carbon::now()->subMonth()->year)
+            ->count();
+        $momChange = $lastMonthCompleted > 0
+            ? round((($thisMonthCompleted - $lastMonthCompleted) / $lastMonthCompleted) * 100)
+            : ($thisMonthCompleted > 0 ? 100 : 0);
+        $momLabel = ($momChange >= 0 ? '+' : '') . $momChange . '%';
+
         $performanceSummaries = [
             [
                 'label' => 'Target Tercapai',
-                'value' => number_format(Booking::where('status', 'approved')->count(), 0, ',', '.'),
+                'value' => number_format($approvedCount, 0, ',', '.'),
                 'unit' => 'Booking',
-                'progress' => 70,
+                'progress' => min(100, intval(($approvedCount / $totalBookings) * 100)),
                 'variant' => 'positive',
             ],
             [
@@ -141,17 +194,17 @@ class PersonalTrainerDashboardController extends Controller
             ],
             [
                 'label' => 'Butuh Perhatian',
-                'value' => number_format(Booking::where('status', 'pending')->count(), 0, ',', '.'),
+                'value' => number_format($pendingCount, 0, ',', '.'),
                 'unit' => 'Booking',
-                'progress' => 15,
+                'progress' => min(100, intval(($pendingCount / $totalBookings) * 100)),
                 'variant' => 'danger',
             ],
             [
                 'label' => 'Sesi Selesai MoM',
-                'value' => '+12%',
+                'value' => $momLabel,
                 'unit' => '',
-                'progress' => 60,
-                'variant' => 'positive',
+                'progress' => min(100, max(0, 50 + $momChange)),
+                'variant' => $momChange >= 0 ? 'positive' : 'danger',
             ],
         ];
 
@@ -183,7 +236,7 @@ class PersonalTrainerDashboardController extends Controller
             ],
         ];
 
-        return view('crud_pelatih.dashboard', compact(
+        return view('crud_trainer.dashboard', compact(
             'stats',
             'todaySchedules',
             'recentBookings',
@@ -195,7 +248,23 @@ class PersonalTrainerDashboardController extends Controller
             'alerts'
         ));
     }
+    public function updateBookingStatus(Request $request, Booking $booking)
+    {
+        $this->authorizeRole('trainer');
 
+        if ($booking->trainer_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'status' => ['required', Rule::in(['approved', 'cancelled', 'completed'])],
+        ]);
+
+        $booking->status = $validated['status'];
+        $booking->save();
+
+        return back()->with('success', 'Status booking berhasil diperbarui.');
+    }
     private function getStatusClass(string $status): string
     {
         return match ($status) {

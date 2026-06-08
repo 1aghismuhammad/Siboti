@@ -18,7 +18,7 @@ class AuthenticatedSessionController extends Controller
     {
     // Cek apakah request datang dari route trainer
         if ($request->is('trainer/*')) {
-            return view('crud_pelatih.login');
+            return view('crud_trainer.login');
         }
 
         return view('auth.login');
@@ -34,6 +34,11 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
 
         $user = Auth::user();
+
+        if ($request->is('trainer/*') && $user->role !== 'trainer') {
+            Auth::logout();
+            return back()->withErrors(['email' => 'Akun ini tidak memiliki akses Trainer. Gunakan halaman login utama atau akun trainer.']);
+        }
 
         switch ($user->role) {
 

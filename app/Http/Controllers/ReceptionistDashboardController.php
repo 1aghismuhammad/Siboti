@@ -12,11 +12,17 @@ class ReceptionistDashboardController extends Controller
 {
     public function __invoke(): View
     {
+        $this->authorizeRole('receptionist');
+
         $checkinToday = Checkin::whereDate('checkin_time', Carbon::today())->count();
         $activeMembers = Subscription::where('status', 'active')
             ->whereDate('end_date', '>=', Carbon::today())
             ->count();
         $expiredMembers = Subscription::where('status', 'expired')->count();
+        $approachingExpMembers = Subscription::where('status', 'active')
+            ->whereDate('end_date', '<=', Carbon::today()->addDays(3))
+            ->whereDate('end_date', '>=', Carbon::today())
+            ->count();
         $posToday = PosTransaction::whereDate('transacted_at', Carbon::today())->count();
 
         $stats = [
@@ -122,14 +128,14 @@ class ReceptionistDashboardController extends Controller
 
         $alerts = [
             [
-                'title' => sprintf('%d Member Mendekati Expired', $expiredMembers),
+                'title' => sprintf('%d Member Mendekati Expired', $approachingExpMembers),
                 'description' => 'Masa aktif akan berakhir dalam 3 hari ke depan. Ingatkan saat check-in.',
                 'type' => 'info',
                 'icon' => 'info',
             ],
             [
                 'title' => 'Transaksi Pending',
-                'description' => sprintf('%d transaksi pending hari ini.', PosTransaction::where('status', 'Pending')->count()),
+                'description' => sprintf('%d transaksi pending belum diselesaikan.', PosTransaction::where('status', 'Pending')->count()),
                 'type' => 'warning',
                 'icon' => 'warning',
             ],

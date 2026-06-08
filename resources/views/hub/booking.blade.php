@@ -363,6 +363,64 @@
     }
     .wa-btn-sm:hover { background: #1fb855; }
     /* ══════════════════════════════════════════
+       MEMBERSHIP BANNER
+       ══════════════════════════════════════════ */
+    .membership-warning-banner {
+        background: rgba(255,71,87,0.08);
+        border: 1px solid rgba(255,71,87,0.25);
+        border-radius: 14px;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+    .membership-warning-banner__icon {
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+    .membership-warning-banner__text { flex: 1; }
+    .membership-warning-banner__title {
+        margin: 0 0 0.2rem;
+        font-size: 0.875rem;
+        font-weight: 800;
+        color: #ff4757;
+    }
+    .membership-warning-banner__desc {
+        margin: 0;
+        font-size: 0.75rem;
+        color: rgba(255,255,255,0.45);
+        line-height: 1.5;
+    }
+    .membership-warning-banner__btn {
+        background: #ff4757;
+        color: #fff;
+        border: none;
+        border-radius: 0.625rem;
+        padding: 0.625rem 1.125rem;
+        font-size: 0.78rem;
+        font-weight: 700;
+        cursor: pointer;
+        font-family: 'Inter', sans-serif;
+        white-space: nowrap;
+        transition: background 0.2s ease;
+        flex-shrink: 0;
+    }
+    .membership-warning-banner__btn:hover { background: #e03e4d; }
+    /* Popup membership plans */
+    .popup-membership {
+        background: #111111;
+        border-radius: 1.25rem;
+        border: 1px solid rgba(255,71,87,0.2);
+        width: 100%;
+        max-width: 480px;
+        padding: 2rem;
+        position: relative;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    /* ══════════════════════════════════════════
        POPUPS
        ══════════════════════════════════════════ */
     .popup-overlay {
@@ -510,9 +568,25 @@
         </div>
         <div class="booking-header-badge">
             <span class="booking-header-badge__label">Paket Aktif:</span>
-            <span class="booking-header-badge__value">Paket Pro</span>
+            @if($hasActiveSub && $activeSub?->membershipPlan)
+                <span class="booking-header-badge__value">{{ $activeSub->membershipPlan->name }}</span>
+            @else
+                <span class="booking-header-badge__value" style="color:#ff4757;">Belum Ada Paket</span>
+            @endif
         </div>
     </div>
+
+    {{-- MEMBERSHIP WARNING BANNER --}}
+    @if(!$hasActiveSub)
+    <div class="membership-warning-banner" id="membershipWarning">
+        <span class="membership-warning-banner__icon">⚠️</span>
+        <div class="membership-warning-banner__text">
+            <p class="membership-warning-banner__title">Kamu Belum Memiliki Paket Membership!</p>
+            <p class="membership-warning-banner__desc">Beli paket membership terlebih dahulu untuk dapat booking sesi personal trainer. Booking tanpa membership bersifat <strong style="color:#ffa502;">Direct</strong> dan memerlukan persetujuan admin secara manual.</p>
+        </div>
+        <button class="membership-warning-banner__btn" onclick="bukaPopupMembership()">Lihat Paket →</button>
+    </div>
+    @endif
 
     {{-- STEP 1: PILIH PT --}}
     <div class="booking-step-pt">
@@ -524,62 +598,39 @@
 
             <div class="pt-grid">
                 @php
-                $ptList = [
-                    [
-                        'id' => 'masrafa',
-                        'nama' => 'Mas Rafa ',
-                        'role' => 'Trainer Pencetus UAS Massal',
-                        'img' => 'pelatih.webp',
-                        'hari' => ['Sen','Rab','Jum'],
-                        'slots' => ['06.00','08.00','10.00'],
-                    ],
-                    [
-                        'id' => 'pengendaligunpat',
-                        'nama' => 'Pengendali Gunpat',
-                        'role' => 'Spesialis Counter Raja Terakhir',
-                        'img' => 'pelatih.webp',
-                        'hari' => ['Sel','Kam','Sab'],
-                        'slots' => ['08.00','14.00','16.00'],
-                    ],
-                    [
-                        'id' => 'rafaeditor',
-                        'nama' => 'Rafa Editor',
-                        'role' => 'Pembasmi Deadline UAS',
-                        'img' => 'pelatih.webp',
-                        'hari' => ['Sen','Sel','Rab','Kam'],
-                        'slots' => ['06.00','10.00','19.00'],
-                    ],
-                    [
-                        'id' => 'rafapupay',
-                        'nama' => 'Rafa PudakPayung',
-                        'role' => 'Raja Terakhir',
-                        'img' => 'pelatih.webp',
-                        'hari' => ['Rab','Jum','Sab'],
-                        'slots' => ['14.00','16.00','19.00'],
-                    ],
-                ];
+                    $trainerSchedules = [
+                        ['hari' => ['Sen','Rab','Jum'], 'slots' => ['06.00','08.00','10.00']],
+                        ['hari' => ['Sel','Kam','Sab'], 'slots' => ['08.00','14.00','16.00']],
+                        ['hari' => ['Sen','Sel','Rab','Kam'], 'slots' => ['06.00','10.00','19.00']],
+                        ['hari' => ['Rab','Jum','Sab'], 'slots' => ['14.00','16.00','19.00']],
+                    ];
                 @endphp
 
-                @foreach($ptList as $pt)
-                <div class="pt-card"
-                     onclick="pilihPT(this)"
-                     data-pt-id="{{ $pt['id'] }}"
-                     data-pt-nama="{{ $pt['nama'] }}"
-                     data-pt-role="{{ $pt['role'] }}"
-                     data-pt-hari="{{ implode(',', $pt['hari']) }}"
-                     data-pt-slots="{{ implode(',', $pt['slots']) }}">
-                    <div class="pt-card__check">✓</div>
-                    <img src="{{ asset('image/Pelatih/' . $pt['img']) }}"
-                         alt="{{ $pt['nama'] }}"
-                         class="pt-card__img">
-                    <p class="pt-card__name">{{ $pt['nama'] }}</p>
-                    <p class="pt-card__role">{{ $pt['role'] }}</p>
-                    <div class="pt-card__days">
-                        @foreach($pt['hari'] as $h)
-                        <span class="pt-card__day-chip">{{ $h }}</span>
-                        @endforeach
+                @foreach($trainers as $index => $trainer)
+                    @php
+                        $schedule = $trainerSchedules[$index % count($trainerSchedules)];
+                        $trainerDisplay = $trainer->name;
+                        $trainerRole = 'Personal Trainer';
+                    @endphp
+                    <div class="pt-card"
+                         onclick="pilihPT(this)"
+                         data-pt-id="{{ $trainer->id }}"
+                         data-pt-nama="{{ $trainerDisplay }}"
+                         data-pt-role="{{ $trainerRole }}"
+                         data-pt-hari="{{ implode(',', $schedule['hari']) }}"
+                         data-pt-slots="{{ implode(',', $schedule['slots']) }}">
+                        <div class="pt-card__check">✓</div>
+                        <img src="{{ asset('image/Pelatih/pelatih.webp') }}"
+                             alt="{{ $trainerDisplay }}"
+                             class="pt-card__img">
+                        <p class="pt-card__name">{{ $trainerDisplay }}</p>
+                        <p class="pt-card__role">{{ $trainerRole }}</p>
+                        <div class="pt-card__days">
+                            @foreach($schedule['hari'] as $h)
+                                <span class="pt-card__day-chip">{{ $h }}</span>
+                            @endforeach
+                        </div>
                     </div>
-                </div>
                 @endforeach
             </div>
 
@@ -633,16 +684,72 @@
 
     </div>
 
-    {{-- RIWAYAT BOOKING --}}
-    <div id="riwayat-section" style="display:none;">
-        <div class="hub-card">
-            <div class="hub-card__header">
-                <p class="hub-card__title">3 Booking Terakhir</p>
-                <button onclick="hapusSemuaRiwayat()" class="hapus-semua-btn">Hapus Semua</button>
-            </div>
-            <div id="riwayat-list" class="riwayat-list"></div>
+    <form id="bookingForm" method="POST" action="{{ route('hub.bookings.store') }}">
+        @csrf
+        <input type="hidden" name="trainer_id" id="bookingTrainerId">
+        <input type="hidden" name="booking_date" id="bookingDate">
+        <input type="hidden" name="booking_time" id="bookingTime">
+        <input type="hidden" name="session_type" id="bookingSessionType">
+    </form>
+
+    @if(session('success'))
+        <div class="hub-card hub-card--success">
+            <p>{{ session('success') }}</p>
         </div>
-    </div>
+    @endif
+
+    @if($errors->any())
+        <div class="hub-card hub-card--danger">
+            <ul>
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    <section class="hub-card hub-booking-list">
+        <div class="hub-card__header">
+            <p class="hub-card__title">Booking Saya</p>
+        </div>
+
+        @if($myBookings->isEmpty())
+            <p class="hub-card__empty">Belum ada booking aktif. Pilih trainer dan jadwal untuk membuat reservasi.</p>
+        @else
+            <table class="hub-table">
+                <thead>
+                    <tr>
+                        <th>Trainer</th>
+                        <th>Tanggal</th>
+                        <th>Waktu</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($myBookings as $booking)
+                        <tr>
+                            <td>{{ $booking->trainer?->name ?? '-' }}</td>
+                            <td>{{ $booking->booking_date->format('d M Y') }}</td>
+                            <td>{{ substr($booking->booking_time, 0, 5) }}</td>
+                            <td>{{ ucfirst($booking->status) }}</td>
+                            <td>
+                                @if($booking->status !== 'completed')
+                                    <form method="POST" action="{{ route('hub.bookings.destroy', $booking) }}" onsubmit="return confirm('Batalkan booking ini?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="admin-small-button admin-small-button--danger">Batal</button>
+                                    </form>
+                                @else
+                                    <span class="badge badge--neutral">Selesai</span>
+                                @endif
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        @endif
+    </section>
 
 </main>
 
@@ -658,9 +765,13 @@
                 <span class="popup-info-row__icon">👤</span>
                 <div class="popup-info-row__content">
                     <p class="popup-info-row__label">Member</p>
-                    <p class="popup-info-row__value">Budi Santoso</p>
+                    <p class="popup-info-row__value">{{ auth()->user()->name }}</p>
                 </div>
-                <span class="popup-info-row__badge">Paket Pro</span>
+                @if($hasActiveSub && $activeSub?->membershipPlan)
+                    <span class="popup-info-row__badge">{{ $activeSub->membershipPlan->name }}</span>
+                @else
+                    <span class="popup-info-row__badge" style="background:rgba(255,71,87,0.1);color:#ff4757;">Direct</span>
+                @endif
             </div>
             <div class="popup-info-row">
                 <span class="popup-info-row__icon">🏋️</span>
@@ -713,6 +824,44 @@
     </div>
 </div>
 
+{{-- POPUP MEMBERSHIP (jika belum punya membership) --}}
+<div id="popup-membership" class="popup-overlay">
+    <div class="popup-membership">
+        <div class="popup-header">
+            <p class="popup-header__title">Pilih Paket Membership</p>
+            <button onclick="tutupPopupMembership()" class="popup-close">✕</button>
+        </div>
+        <div style="margin-bottom:1.25rem;padding:0.875rem 1rem;background:rgba(255,71,87,0.06);border:1px solid rgba(255,71,87,0.15);border-radius:0.75rem;">
+            <p style="margin:0;font-size:0.78rem;color:#ccc;line-height:1.6;">
+                Kamu belum memiliki paket membership aktif. Silakan beli salah satu paket di bawah dan hubungi admin via WhatsApp untuk konfirmasi. Setelah membership aktif, kamu bisa booking personal trainer dengan lebih mudah.
+            </p>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:0.875rem;margin-bottom:1.5rem;">
+            @forelse($membershipPlans as $plan)
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:1rem 1.125rem;background:rgba(204,255,0,0.03);border:1px solid rgba(204,255,0,0.12);border-radius:0.875rem;gap:1rem;">
+                <div style="flex:1;">
+                    <strong style="color:#fff;font-size:0.875rem;display:block;margin-bottom:0.2rem;">{{ $plan->name }}</strong>
+                    <small style="color:#888;font-size:0.7rem;">{{ $plan->duration_days }} hari · {{ $plan->description }}</small>
+                </div>
+                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.5rem;flex-shrink:0;">
+                    <span style="color:#ccff00;font-weight:800;font-size:0.9rem;">Rp{{ number_format($plan->price, 0, ',', '.') }}</span>
+                    <a href="{{ route('hub.membership.buy', $plan->id) }}" style="background:#ccff00;color:#000;border:none;border-radius:0.5rem;padding:0.4rem 0.875rem;font-size:0.72rem;font-weight:700;text-decoration:none;font-family:'Inter',sans-serif;white-space:nowrap;">Beli Sekarang</a>
+                </div>
+            </div>
+            @empty
+            <p style="color:#888;font-size:0.8rem;text-align:center;">Tidak ada paket tersedia saat ini.</p>
+            @endforelse
+        </div>
+        <div style="display:flex;gap:0.75rem;">
+            <button onclick="tutupPopupMembership()" class="popup-btn popup-btn--cancel" style="flex:1;">Nanti Dulu</button>
+            <a href="https://wa.me/6281234567890?text={{ urlencode('Halo Admin Siboti! Saya ' . auth()->user()->name . ' ingin membeli paket membership. Mohon bantuannya.') }}" target="_blank" class="popup-btn popup-btn--wa" style="flex:1;text-decoration:none;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                Hubungi Admin
+            </a>
+        </div>
+    </div>
+</div>
+
 <script>
 /* ── Sidebar Toggle ── */
 (function(){
@@ -732,6 +881,7 @@
 /* ── Data PT & State ── */
 const hariMap = {'Min':0,'Sen':1,'Sel':2,'Rab':3,'Kam':4,'Jum':5,'Sab':6};
 let selectedPT = null;
+let selectedPTId = null;
 let selectedPTSlots = [];
 let selectedPTHari = [];
 let selectedWaktu = [];
@@ -743,6 +893,7 @@ function pilihPT(card) {
     document.querySelectorAll('.pt-card').forEach(c => c.classList.remove('pt-card--active'));
     card.classList.add('pt-card--active');
 
+    selectedPTId = card.dataset.ptId;
     selectedPT = card.dataset.ptNama;
     selectedPTSlots = card.dataset.ptSlots.split(',');
     selectedPTHari = card.dataset.ptHari.split(',').map(h => hariMap[h.trim()]);
@@ -844,12 +995,28 @@ function updateRingkasan(){
     } else { el.classList.remove('ringkasan--visible'); }
 }
 
+/* ── Popup Membership ── */
+const hasActiveSub = {{ $hasActiveSub ? 'true' : 'false' }};
+
+function bukaPopupMembership() {
+    document.getElementById('popup-membership').classList.add('is-open');
+    document.body.classList.add('popup-open');
+}
+function tutupPopupMembership() {
+    document.getElementById('popup-membership').classList.remove('is-open');
+    document.body.classList.remove('popup-open');
+}
+document.getElementById('popup-membership').addEventListener('click', function(e) {
+    if (e.target === this) tutupPopupMembership();
+});
+
 /* ── Popup 1 ── */
 function bukaPopup1(e){
     e.preventDefault();
     if(!selectedPT){showToast('Pilih Personal Trainer terlebih dahulu!');return;}
     if(!selectedDate){showToast('Pilih tanggal terlebih dahulu!');return;}
     if(selectedWaktu.length===0){showToast('Pilih minimal 1 sesi waktu!');return;}
+    // Frontend check removed so Direct Booking can proceed and hit the backend
     const slots=selectedPTSlots.length>0?selectedPTSlots:['06.00','08.00','10.00','14.00','16.00','19.00'];
     const sorted=[...selectedWaktu].sort((a,b)=>slots.indexOf(a)-slots.indexOf(b));
     const days=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
@@ -871,21 +1038,16 @@ function tutupPopup1(){
 function lanjutKonfirmasi(){
     const slots=selectedPTSlots.length>0?selectedPTSlots:['06.00','08.00','10.00','14.00','16.00','19.00'];
     const sorted=[...selectedWaktu].sort((a,b)=>slots.indexOf(a)-slots.indexOf(b));
-    const days=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
-    const months=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
-    const tgl=days[selectedDate.getDay()]+', '+selectedDate.getDate()+' '+months[selectedDate.getMonth()]+' '+selectedDate.getFullYear();
-    document.getElementById('sukses-detail').textContent=tgl+' · '+sorted.join(' & ')+' · '+selectedPT;
-    const pesanWA=encodeURIComponent(
-        'Halo Admin Siboti Gym! 👋\n\nSaya ingin konfirmasi booking:\n\n'+
-        '👤 Nama: Budi Santoso\n🏋️ PT: '+selectedPT+
-        '\n📅 Tanggal: '+tgl+'\n⏰ Waktu: '+sorted.join(' & ')+
-        '\n🎫 Paket: Pro\n\nMohon konfirmasi pembayaran. Terima kasih!'
-    );
-    document.getElementById('wa-btn').href='https://wa.me/6281234567890?text='+pesanWA;
-    simpanRiwayat(tgl, sorted.join(' & '), selectedPT);
-    tutupPopup1();
-    document.getElementById('popup-sukses').classList.add('is-open');
-    document.body.classList.add('popup-open');
+    const bookingDate = selectedDate.toISOString().slice(0,10);
+    const bookingTime = sorted[0].replace('.', ':');
+    const sessionType = sorted.length > 1 ? `${sorted.length} sesi: ${sorted.join(' & ')}` : `1 sesi: ${sorted[0]}`;
+
+    document.getElementById('bookingTrainerId').value = selectedPTId;
+    document.getElementById('bookingDate').value = bookingDate;
+    document.getElementById('bookingTime').value = bookingTime;
+    document.getElementById('bookingSessionType').value = sessionType;
+
+    document.getElementById('bookingForm').submit();
 }
 
 function tutupPopupSukses(){
@@ -899,6 +1061,7 @@ document.addEventListener('keydown',function(e){
     if(e.key==='Escape'){
         if(document.getElementById('popup-sukses').classList.contains('is-open'))tutupPopupSukses();
         if(document.getElementById('popup-ringkasan').classList.contains('is-open'))tutupPopup1();
+        if(document.getElementById('popup-membership').classList.contains('is-open'))tutupPopupMembership();
     }
 });
 
@@ -959,7 +1122,24 @@ function showToast(msg){
 
 renderCalendar();
 renderWaktuGrid();
-document.addEventListener('DOMContentLoaded', tampilkanRiwayat);
+document.addEventListener('DOMContentLoaded', function() {
+    tampilkanRiwayat();
+    
+    @if(session('direct_wa_url'))
+        // Buka tab baru untuk WhatsApp
+        window.open("{{ session('direct_wa_url') }}", "_blank");
+        
+        // Tampilkan popup sukses di tab saat ini
+        document.getElementById('sukses-detail').textContent = "{{ session('success') }}";
+        document.getElementById('popup-sukses').classList.add('is-open');
+        document.body.classList.add('popup-open');
+    @elseif(session('success'))
+        // Tampilkan popup sukses biasa
+        document.getElementById('sukses-detail').textContent = "{{ session('success') }}";
+        document.getElementById('popup-sukses').classList.add('is-open');
+        document.body.classList.add('popup-open');
+    @endif
+});
 </script>
 </body>
 </html>

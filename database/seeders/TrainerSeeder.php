@@ -10,11 +10,13 @@ class TrainerSeeder extends Seeder
 {
     public function run(): void
     {
-        User::create([
-            'name' => 'Trainer SiBoti',
-            'email' => 'trainer@siboti.com',
-            'role' => 'trainer',
-            'password' => Hash::make('trainer123'),
-        ]);
+        User::updateOrCreate(
+            ['email' => 'trainer@siboti.com'],
+            [
+                'name' => 'Trainer SiBoti',
+                'role' => 'trainer',
+                'password' => Hash::make('trainer123'),
+            ]
+        );
     }
 }

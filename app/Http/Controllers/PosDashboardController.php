@@ -12,6 +12,8 @@ class PosDashboardController extends Controller
 {
     public function __invoke(): View
     {
+        $this->authorizeRole('receptionist');
+
         $todayTransactions = PosTransaction::whereDate('transacted_at', Carbon::today());
         $totalSales = $todayTransactions->sum('total');
         $soldProducts = $todayTransactions->sum('items_count');

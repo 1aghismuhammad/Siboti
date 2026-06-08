@@ -447,32 +447,32 @@
     </div>
     <p class="trainer-sidebar__section-title">Member Saya (4)</p>
     <div class="trainer-member-list" id="member-list">
-        @foreach([
-            ['RA','Rizky Adhitya','Paket Pro', true],
-            ['NP','Nadia Pramesti','Paket Basic', false],
-            ['DW','Danu Wicaksono','Paket Elite', false],
-            ['SL','Sinta Lestari','Paket Pro', false],
-        ] as $m)
-        <a href="#" onclick="pilihMember('{{ $m[1] }}', event)"
-           class="trainer-member-item {{ $m[3] ? 'trainer-member-item--active' : '' }}"
-           data-nama="{{ strtolower($m[1]) }}">
-            <div class="trainer-member-item__avatar">{{ $m[0] }}</div>
+        @forelse($clients as $index => $m)
+        <a href="#" onclick="pilihMember('{{ $m['name'] }}', event)"
+           class="trainer-member-item {{ $index === 0 ? 'trainer-member-item--active' : '' }}"
+           data-nama="{{ strtolower($m['name']) }}">
+            <div class="trainer-member-item__avatar">{{ $m['initials'] }}</div>
             <div class="trainer-member-item__info">
-                <p class="trainer-member-item__name">{{ $m[1] }}</p>
-                <p class="trainer-member-item__paket">{{ $m[2] }}</p>
+                <p class="trainer-member-item__name">{{ $m['name'] }}</p>
+                <p class="trainer-member-item__paket">{{ $m['package'] }}</p>
             </div>
         </a>
-        @endforeach
+        @empty
+        <p style="text-align: center; color: rgba(255,255,255,0.4); padding: 1rem; font-size: 0.8rem;">Belum ada member yang booking.</p>
+        @endforelse
     </div>
     <div class="trainer-sidebar__footer">
         <div class="trainer-sidebar__footer-user">
-            <div class="trainer-sidebar__footer-avatar">CD</div>
+            <div class="trainer-sidebar__footer-avatar">{{ strtoupper(substr(auth()->user()->name ?? 'T', 0, 2)) }}</div>
             <div>
-                <p class="trainer-sidebar__footer-name">Coach Dimas</p>
+                <p class="trainer-sidebar__footer-name">{{ auth()->user()->name ?? 'Trainer' }}</p>
                 <p class="trainer-sidebar__footer-role">Personal Trainer</p>
             </div>
         </div>
-        <button class="logout-btn" title="Keluar">⎋</button>
+        <form method="POST" action="{{ route('logout') }}" style="display:inline;">
+            @csrf
+            <button type="submit" class="logout-btn" title="Keluar">⎋</button>
+        </form>
     </div>
 </aside>
 {{-- ═══ MAIN CONTENT ═══ --}}
@@ -481,7 +481,7 @@
     <div class="trainer-main__header">
         <div>
             <p class="trainer-main__label">Dashboard Member</p>
-            <h1 class="trainer-main__title" id="member-title">Rizky Adhitya.</h1>
+            <h1 class="trainer-main__title" id="member-title">{{ count($clients) > 0 ? $clients[0]['name'] . '.' : 'Pilih Member' }}</h1>
             <p class="trainer-main__desc">Kelola jadwal, pantau booking yang masuk, dan catat progress latihan member secara mendetail.</p>
         </div>
         <button class="trainer-btn" onclick="bukaModal()">
@@ -500,16 +500,11 @@
     <div class="tab-panel tab-panel--progress">
         {{-- Stat Cards --}}
         <div class="trainer-stats">
-            @foreach([
-                ['Total Sesi','12','Sesi'],
-                ['Total Volume','5.1','Ton'],
-                ['Rata Durasi','45','Menit'],
-                ['Paket Aktif','Pro',''],
-            ] as $s)
+            @foreach($stats as $s)
             <div class="trainer-stat-card">
                 <div>
-                    <p class="trainer-stat-card__label">{{ $s[0] }}</p>
-                    <p class="trainer-stat-card__value">{{ $s[1] }}<span class="trainer-stat-card__unit">{{ $s[2] }}</span></p>
+                    <p class="trainer-stat-card__label">{{ $s['label'] }}</p>
+                    <p class="trainer-stat-card__value">{{ $s['value'] }}<span class="trainer-stat-card__unit"></span></p>
                 </div>
             </div>
             @endforeach
@@ -527,26 +522,23 @@
                         <thead>
                             <tr>
                                 <th>Tanggal</th>
-                                <th>Latihan Utama</th>
-                                <th>Beban Max</th>
-                                <th>Set × Rep</th>
-                                <th>Durasi</th>
+                                <th>Member</th>
+                                <th>Berat Badan</th>
+                                <th>Tinggi Badan</th>
+                                <th>Otot / Lemak</th>
                                 <th>Catatan Trainer</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
                         <tbody id="progress-tbody">
-                            @foreach([
-                                ['2025-05-20','Bench Press','100 kg','4 × 8','50m','Form rapi, fokus eccentric. Naikkan beban minggu depan.'],
-                                ['2025-05-24','Squat','120 kg','5 × 5','40m','Depth sangat bagus, core stabil.'],
-                            ] as $r)
+                            @forelse($progressHistory as $r)
                             <tr>
-                                <td style="font-weight:600; color:#fff;">{{ $r[0] }}</td>
-                                <td><span class="trainer-table__badge">{{ $r[1] }}</span></td>
-                                <td style="color:#CCFF00; font-weight:700;">{{ $r[2] }}</td>
-                                <td>{{ $r[3] }}</td>
-                                <td>{{ $r[4] }}</td>
-                                <td style="max-width:200px; color:rgba(255,255,255,0.5); font-size:0.75rem; line-height:1.4;">{{ $r[5] }}</td>
+                                <td style="font-weight:600; color:#fff;">{{ $r['time'] }}</td>
+                                <td><span class="trainer-table__badge">{{ $r['member'] }}</span></td>
+                                <td style="color:#CCFF00; font-weight:700;">{{ $r['weight'] }}</td>
+                                <td>{{ $r['height'] }}</td>
+                                <td>{{ $r['muscle_mass'] }} / {{ $r['fat_percentage'] }}</td>
+                                <td style="max-width:200px; color:rgba(255,255,255,0.5); font-size:0.75rem; line-height:1.4;">{{ $r['notes'] }}</td>
                                 <td>
                                     <div style="display:flex;">
                                         <button class="trainer-table__action" title="Edit" onclick="bukaModalEdit(this)">✏️</button>
@@ -554,7 +546,11 @@
                                     </div>
                                 </td>
                             </tr>
-                            @endforeach
+                            @empty
+                            <tr>
+                                <td colspan="7" style="text-align:center; padding: 2rem; color: rgba(255,255,255,0.4);">Belum ada riwayat progress dicatat.</td>
+                            </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
@@ -572,47 +568,45 @@
             <button class="booking-filter-btn" onclick="filterBooking('confirmed', this)">Dikonfirmasi</button>
         </div>
         <div class="booking-list" id="booking-list">
-            {{-- Item 1: Pending --}}
-            <div class="booking-item booking-item--pending" data-status="pending">
+            @forelse($bookings as $booking)
+            <div class="booking-item booking-item--{{ $booking['statusClass'] === 'warning' ? 'pending' : ($booking['statusClass'] === 'success' ? 'confirmed' : 'rejected') }}" data-status="{{ $booking['statusClass'] === 'warning' ? 'pending' : ($booking['statusClass'] === 'success' ? 'confirmed' : 'rejected') }}">
                 <div class="booking-item__left">
-                    <div class="booking-item__avatar">RA</div>
+                    <div class="booking-item__avatar">{{ $booking['initials'] }}</div>
                     <div class="booking-item__info">
-                        <p class="booking-item__nama">Rizky Adhitya</p>
+                        <p class="booking-item__nama">{{ $booking['member'] }}</p>
                         <div class="booking-item__meta">
-                            <span>📅 Sen, 2 Jun 2025</span>
-                            <span style="color:#fff; font-weight:600;">⏰ 08.00 & 10.00</span>
+                            <span>📅 {{ explode(', ', $booking['dateTime'])[0] }}</span>
+                            <span style="color:#fff; font-weight:600;">⏰ {{ explode(', ', $booking['dateTime'])[1] ?? '' }}</span>
                         </div>
                     </div>
                 </div>
                 <div class="booking-item__center">
-                    <span class="booking-item__badge badge--pro">Paket Pro</span>
-                    <span class="booking-item__badge badge--lunas">Sudah Dibayar</span>
+                    <span class="booking-item__badge badge--pro">{{ $booking['program'] }}</span>
                 </div>
                 <div class="booking-item__actions">
-                    <button class="booking-btn-confirm" onclick="konfirmasiBooking(this)">Terima</button>
-                    <button class="booking-btn-reject" onclick="tolakBooking(this)">Tolak</button>
+                    @if(strtolower($booking['status']) === 'menunggu' || strtolower($booking['status']) === 'pending')
+                    <form action="{{ route('trainer.bookings.update', $booking['id']) }}" method="POST" style="display:inline;">
+                        @csrf
+                        @method('PATCH')
+                        <input type="hidden" name="status" value="approved">
+                        <button type="submit" class="booking-btn-confirm">Terima</button>
+                    </form>
+                    <form action="{{ route('trainer.bookings.update', $booking['id']) }}" method="POST" style="display:inline;">
+                        @csrf
+                        @method('PATCH')
+                        <input type="hidden" name="status" value="cancelled">
+                        <button type="submit" class="booking-btn-reject">Tolak</button>
+                    </form>
+                    @else
+                    <span class="booking-status-label booking-status-label--{{ $booking['statusClass'] === 'success' ? 'confirmed' : 'rejected' }}">
+                        {{ $booking['statusClass'] === 'success' ? '✓ Dikonfirmasi' : '✕ Dibatalkan' }}
+                    </span>
+                    @endif
                 </div>
             </div>
-            {{-- Item 2: Confirmed --}}
-            <div class="booking-item booking-item--confirmed" data-status="confirmed">
-                <div class="booking-item__left">
-                    <div class="booking-item__avatar">DW</div>
-                    <div class="booking-item__info">
-                        <p class="booking-item__nama">Danu Wicaksono</p>
-                        <div class="booking-item__meta">
-                            <span>📅 Rab, 4 Jun 2025</span>
-                            <span style="color:#fff; font-weight:600;">⏰ 16.00</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="booking-item__center">
-                    <span class="booking-item__badge badge--elite">Paket Elite</span>
-                    <span class="booking-item__badge badge--lunas">Sudah Dibayar</span>
-                </div>
-                <div class="booking-item__actions">
-                    <span class="booking-status-label booking-status-label--confirmed">✓ Dikonfirmasi</span>
-                </div>
-            </div>
+            @empty
+            <p style="text-align: center; color: rgba(255,255,255,0.4); padding: 2rem;">Tidak ada booking masuk.</p>
+            @endforelse
         </div>
     </div>
     {{-- ══════════════════════════════════════

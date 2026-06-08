@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Siboti - Gym Premium Semarang | Booking Online</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     <meta name="description" content="Siboti adalah gym premium di Semarang dengan trainer bersertifikat, peralatan modern, dan fasilitas lengkap.">
     <meta name="keywords" content="gym semarang, fitness semarang, personal trainer semarang, membership gym, booking gym online, siboti gym">
     <meta name="robots" content="index, follow">

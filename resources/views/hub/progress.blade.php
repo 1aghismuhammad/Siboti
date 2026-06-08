@@ -373,16 +373,11 @@
     </div>
     {{-- STATS --}}
     <div class="progress-stats">
-        @foreach([
-            ['Sesi Minggu Ini','18','↑ +2', false],
-            ['Total Kalori','12.4k','↑ +8%', false],
-            ['Durasi Rata-rata','58m','↓ -3%', true],
-            ['Konsistensi','92%','↑ +5%', false],
-        ] as $s)
+        @foreach($stats as $s)
         <div class="progress-stat">
-            <p class="progress-stat__label">{{ $s[0] }}</p>
-            <p class="progress-stat__value">{{ $s[1] }}</p>
-            <p class="progress-stat__change {{ $s[3] ? 'down' : '' }}">{{ $s[2] }}</p>
+            <p class="progress-stat__label">{{ $s['label'] }}</p>
+            <p class="progress-stat__value">{{ $s['value'] }}</p>
+            <p class="progress-stat__change {{ $s['changeClass'] === 'down' ? 'down' : '' }}">{{ $s['change'] }}</p>
         </div>
         @endforeach
     </div>
@@ -422,18 +417,16 @@
                     <a href="#" class="hub-card__link">Lihat semua →</a>
                 </div>
                 <div class="angkatan-grid">
-                    @foreach([
-                        ['Bench Press','80','kg','↑ +5kg'],
-                        ['Squat','100','kg','↑ +10kg'],
-                        ['Deadlift','120','kg','↑ +7.5kg'],
-                        ['OHP','50','kg','↑ +2.5kg'],
-                    ] as $a)
-                    <div class="angkatan-item">
-                        <p class="angkatan-item__name">{{ $a[0] }}</p>
-                        <p class="angkatan-item__value">{{ $a[1] }}<span class="angkatan-item__unit"> {{ $a[2] }}</span></p>
-                        <p class="angkatan-item__change">{{ $a[3] }}</p>
+                    @forelse($progressRecords as $record)
+                    <div class="angkatan-item" style="grid-column: span 2;">
+                        <p class="angkatan-item__name">{{ $record['date'] }}</p>
+                        <p class="angkatan-item__value">{{ $record['weight'] }}</p>
+                        <p class="angkatan-item__change" style="color: #fff;">Otot: {{ $record['muscleMass'] }} | Lemak: {{ $record['fatPercentage'] }}</p>
+                        <p class="angkatan-item__unit" style="margin-top:0.25rem;">{{ $record['notes'] }}</p>
                     </div>
-                    @endforeach
+                    @empty
+                    <p style="grid-column: 1 / -1; color: rgba(255,255,255,0.4); text-align: center; font-size: 0.8rem;">Belum ada catatan progress.</p>
+                    @endforelse
                 </div>
             </div>
         </div>
@@ -444,23 +437,7 @@
                     <p class="hub-card__title">Target Bulanan</p>
                 </div>
                 <div class="target-list">
-                    @foreach([
-                        ['Berat Badan (kg)','72.5 / 70 kg', 85],
-                        ['Volume Angkat (ton)','12.4 / 15 ton', 65],
-                        ['Sesi Cardio','8 / 12 sesi', 55],
-                        ['Konsistensi Hadir','92% / 90%', 100],
-                    ] as $t)
-                    <div>
-                        <div class="target-item__header">
-                            <p class="target-item__name">{{ $t[0] }}</p>
-                            <p class="target-item__value">{{ $t[2] }}%</p>
-                        </div>
-                        <div class="target-bar">
-                            <div class="target-bar__fill" style="width:{{ $t[2] }}%"></div>
-                        </div>
-                        <p style="font-size:0.65rem;color:rgba(255,255,255,0.3);margin-top:0.4rem;font-weight:600;">{{ $t[1] }}</p>
-                    </div>
-                    @endforeach
+                    <p style="color: rgba(255,255,255,0.4); font-size: 0.8rem; text-align: center;">Target bulanan diatur oleh trainer. Segera diskusikan target kamu dengan trainer di sesi berikutnya.</p>
                 </div>
             </div>
         </div>

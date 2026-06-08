@@ -99,14 +99,30 @@
         <p class="auth-card__form-title">Masuk ke akun kamu</p>
 
         <form class="auth-form" action="{{ route('login') }}" method="POST">
+            @if ($errors->any())
+                <div style="background-color: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; color: #ef4444; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem; font-size: 0.875rem;">
+                    <strong>Login Gagal:</strong>
+                    <ul style="margin-top: 0.25rem; margin-left: 1rem; list-style-type: disc;">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
             @csrf
             <div class="auth-form__group">
                 <label class="auth-form__label">Email</label>
                 <input type="email" name="email" class="auth-form__input" placeholder="Masukkan email kamu" value="{{ old('email') }}" required autofocus>
+                @error('email')
+                    <span style="color: red; font-size: 0.8rem;">{{ $message }}</span>
+                @enderror
             </div>
             <div class="auth-form__group">
                 <label class="auth-form__label">Password</label>
                 <input type="password" name="password" class="auth-form__input" placeholder="••••••••" required>
+                @error('password')
+                    <span style="color: red; font-size: 0.8rem;">{{ $message }}</span>
+                @enderror
             </div>
             <div class="auth-form__row">
                 <label class="auth-form__check">

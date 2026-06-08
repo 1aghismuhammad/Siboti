@@ -58,6 +58,11 @@ class User extends Authenticatable
         return $this->hasMany(Subscription::class);
     }
 
+    public function trainerBookings()
+    {
+        return $this->hasMany(Booking::class, 'trainer_id');
+    }
+
     public function checkins()
     {
         return $this->hasMany(Checkin::class);

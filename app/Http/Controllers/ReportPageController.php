@@ -14,6 +14,8 @@ class ReportPageController extends Controller
 {
     public function __invoke(): View
     {
+        $this->authorizeRole('admin');
+
         $activeMembers = Subscription::where('status', 'active')
             ->whereDate('end_date', '>=', Carbon::today())
             ->count();

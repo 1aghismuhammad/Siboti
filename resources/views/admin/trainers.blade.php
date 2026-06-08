@@ -81,7 +81,7 @@
                             <tr>
                                 <th>ID Pelatih</th>
                                 <th>Nama Lengkap</th>
-                                <th>Spesialisasi</th>
+                                <th>Email</th>
                                 <th>Jumlah Member</th>
                                 <th>Rating</th>
                                 <th>Status</th>
@@ -92,29 +92,29 @@
                             @foreach ($trainers as $trainer)
                             <tr id="trainer-row-{{ $loop->index }}"
                                 data-index="{{ $loop->index }}"
-                                data-id="{{ $trainer['id'] }}"
-                                data-name="{{ $trainer['name'] }}"
-                                data-specialty="{{ $trainer['specialty'] }}"
-                                data-members="{{ $trainer['members'] }}"
-                                data-rating="{{ $trainer['rating'] }}"
-                                data-status="{{ $trainer['statusClass'] }}">
-                                <td class="admin-table__strong trainer-id">{{ $trainer['id'] }}</td>
-                                <td class="trainer-name">{{ $trainer['name'] }}</td>
-                                <td class="trainer-specialty">{{ $trainer['specialty'] }}</td>
-                                <td class="trainer-members">{{ $trainer['members'] }} Member</td>
-                                <td>⭐ <span class="trainer-rating">{{ $trainer['rating'] }}</span></td>
+                                data-id="{{ $trainer->id }}"
+                                data-name="{{ $trainer->name }}"
+                                data-email="{{ $trainer->email }}">
+                                <td class="admin-table__strong trainer-id">{{ $trainer->id }}</td>
+                                <td class="trainer-name">{{ $trainer->name }}</td>
+                                <td class="trainer-email">{{ $trainer->email }}</td>
+                                <td class="trainer-members">{{ $trainer->active_members_count ?? 0 }} Member</td>
+                                <td>⭐ <span class="trainer-rating">5.0</span></td>
                                 <td>
-                                    <span class="admin-status admin-status--{{ $trainer['statusClass'] }} trainer-status">
-                                        {{ $trainer['status'] }}
+                                    <span class="admin-status admin-status--success trainer-status">
+                                        Aktif
                                     </span>
                                 </td>
-                                <td class="text-right">
+                                <td class="text-right" style="white-space: nowrap;">
                                     <button type="button" class="admin-small-button btn-edit"
                                         data-index="{{ $loop->index }}">Edit</button>
-                                    <button type="button" class="admin-small-button btn-hapus"
-                                        style="color:#ff4757;border-color:rgba(255,71,87,0.3);margin-left:0.5rem;"
-                                        data-index="{{ $loop->index }}"
-                                        data-name="{{ $trainer['name'] }}">Hapus</button>
+                                        
+                                    <form action="{{ route('admin.trainers.destroy', $trainer->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus akun pelatih ini?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="admin-small-button btn-hapus"
+                                            style="color:#ff4757;border-color:rgba(255,71,87,0.3);margin-left:0.5rem;">Hapus</button>
+                                    </form>
                                 </td>
                             </tr>
                             @endforeach
@@ -128,58 +128,54 @@
 
 {{-- MODAL TAMBAH / EDIT PELATIH --}}
 <div id="trainerModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:999;align-items:center;justify-content:center;">
-    <div style="background:#111;border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:32px;width:100%;max-width:480px;margin:1rem;">
+    <form id="trainerForm" method="POST" action="" style="background:#111;border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:32px;width:100%;max-width:480px;margin:1rem;">
+        @csrf
+        <input type="hidden" name="_method" id="formMethod" value="POST">
+        
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
             <h2 id="modalTitle" style="margin:0;font-size:1.1rem;font-weight:800;">Tambah Pelatih Baru</h2>
             <button type="button" id="modalClose" style="background:transparent;border:none;color:#888;cursor:pointer;font-size:1.5rem;line-height:1;">×</button>
         </div>
 
+        @if($errors->any())
+            <div style="background:rgba(255,71,87,0.1);border:1px solid rgba(255,71,87,0.3);color:#ff4757;padding:12px;border-radius:8px;margin-bottom:16px;font-size:0.85rem;">
+                <ul style="margin:0;padding-left:16px;">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <div style="display:flex;flex-direction:column;gap:16px;">
             <div>
                 <label style="font-size:0.75rem;color:#888;font-weight:600;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;">Nama Lengkap</label>
-                <input id="f-name" type="text" placeholder="Contoh: Andi Firmansyah"
+                <input id="f-name" name="name" type="text" placeholder="Contoh: Andi Firmansyah" required
                     style="width:100%;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);color:#fff;padding:10px 14px;border-radius:8px;font-family:inherit;font-size:0.875rem;outline:none;">
             </div>
             <div>
-                <label style="font-size:0.75rem;color:#888;font-weight:600;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;">Spesialisasi</label>
-                <input id="f-specialty" type="text" placeholder="Contoh: Strength & Conditioning"
+                <label style="font-size:0.75rem;color:#888;font-weight:600;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;">Email Akun</label>
+                <input id="f-email" name="email" type="email" placeholder="Contoh: andi@siboti.com" required
                     style="width:100%;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);color:#fff;padding:10px 14px;border-radius:8px;font-family:inherit;font-size:0.875rem;outline:none;">
             </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                <div>
-                    <label style="font-size:0.75rem;color:#888;font-weight:600;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;">Jumlah Member</label>
-                    <input id="f-members" type="number" min="0" placeholder="0"
-                        style="width:100%;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);color:#fff;padding:10px 14px;border-radius:8px;font-family:inherit;font-size:0.875rem;outline:none;">
-                </div>
-                <div>
-                    <label style="font-size:0.75rem;color:#888;font-weight:600;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;">Rating</label>
-                    <input id="f-rating" type="number" min="1" max="5" step="0.1" placeholder="4.5"
-                        style="width:100%;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);color:#fff;padding:10px 14px;border-radius:8px;font-family:inherit;font-size:0.875rem;outline:none;">
-                </div>
-            </div>
             <div>
-                <label style="font-size:0.75rem;color:#888;font-weight:600;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;">Status</label>
-                <select id="f-status"
-                    style="width:100%;background:#111;border:1px solid rgba(255,255,255,0.1);color:#fff;padding:10px 14px;border-radius:8px;font-family:inherit;font-size:0.875rem;outline:none;">
-                    <option value="success">Aktif</option>
-                    <option value="danger">Nonaktif</option>
-                </select>
+                <label style="font-size:0.75rem;color:#888;font-weight:600;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;">Password</label>
+                <input id="f-password" name="password" type="password" placeholder="Minimal 8 karakter" required minlength="8"
+                    style="width:100%;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);color:#fff;padding:10px 14px;border-radius:8px;font-family:inherit;font-size:0.875rem;outline:none;">
+                <small id="password-help" style="color:#666;font-size:0.7rem;margin-top:4px;display:none;">*Kosongkan jika tidak ingin mengubah password saat edit.</small>
             </div>
         </div>
 
         <div style="display:flex;gap:10px;margin-top:24px;justify-content:flex-end;">
             <button type="button" id="modalCancel" class="admin-small-button">Batal</button>
-            <button type="button" id="modalSave" class="admin-primary-button">Simpan</button>
+            <button type="submit" class="admin-primary-button">Simpan</button>
         </div>
-    </div>
+    </form>
 </div>
 
 <div id="toast" style="position:fixed;bottom:2rem;right:2rem;z-index:9999;display:flex;flex-direction:column;gap:10px;pointer-events:none;"></div>
 
 <script>
-let editingIndex = null;
-let trainerCount = {{ count($trainers) }};
-
 function showToast(message, type = 'success') {
     const colors = {
         success: { bg: 'rgba(46,213,115,0.1)', border: 'rgba(46,213,115,0.3)', color: '#2ed573', icon: 'check_circle' },
@@ -194,24 +190,40 @@ function showToast(message, type = 'success') {
     setTimeout(() => { toast.style.animation = 'slideOut 0.3s ease forwards'; setTimeout(() => toast.remove(), 300); }, 3000);
 }
 
+@if(session('success'))
+    showToast("{{ session('success') }}", 'success');
+@endif
+
 function openModal(mode, index = null) {
-    editingIndex = index;
     const modal = document.getElementById('trainerModal');
-    document.getElementById('modalTitle').textContent = mode === 'add' ? 'Tambah Pelatih Baru' : 'Edit Data Pelatih';
+    const form = document.getElementById('trainerForm');
+    const formMethod = document.getElementById('formMethod');
+    const pwdHelp = document.getElementById('password-help');
+    
+    document.getElementById('modalTitle').textContent = mode === 'add' ? 'Tambah Akun Pelatih' : 'Edit Akun Pelatih';
 
     if (mode === 'edit' && index !== null) {
         const row = document.getElementById(`trainer-row-${index}`);
-        document.getElementById('f-name').value      = row.dataset.name;
-        document.getElementById('f-specialty').value = row.dataset.specialty;
-        document.getElementById('f-members').value   = row.dataset.members;
-        document.getElementById('f-rating').value    = row.dataset.rating;
-        document.getElementById('f-status').value    = row.dataset.status;
+        const id = row.dataset.id;
+        
+        form.action = `/admin/trainers/${id}`;
+        formMethod.value = 'PUT';
+        
+        document.getElementById('f-name').value  = row.dataset.name;
+        document.getElementById('f-email').value = row.dataset.email;
+        
+        document.getElementById('f-password').value = '';
+        document.getElementById('f-password').required = false;
+        pwdHelp.style.display = 'block';
     } else {
-        document.getElementById('f-name').value      = '';
-        document.getElementById('f-specialty').value = '';
-        document.getElementById('f-members').value   = '';
-        document.getElementById('f-rating').value    = '';
-        document.getElementById('f-status').value    = 'success';
+        form.action = `{{ route('admin.trainers.store') }}`;
+        formMethod.value = 'POST';
+        
+        document.getElementById('f-name').value  = '';
+        document.getElementById('f-email').value = '';
+        document.getElementById('f-password').value = '';
+        document.getElementById('f-password').required = true;
+        pwdHelp.style.display = 'none';
     }
 
     modal.style.display = 'flex';
@@ -219,89 +231,14 @@ function openModal(mode, index = null) {
 
 function closeModal() {
     document.getElementById('trainerModal').style.display = 'none';
-    editingIndex = null;
 }
 
-// Simpan
-document.getElementById('modalSave').addEventListener('click', function() {
-    const name      = document.getElementById('f-name').value.trim();
-    const specialty = document.getElementById('f-specialty').value.trim();
-    const members   = document.getElementById('f-members').value.trim();
-    const rating    = document.getElementById('f-rating').value.trim();
-    const status    = document.getElementById('f-status').value;
-
-    if (!name || !specialty) {
-        showToast('Nama dan spesialisasi wajib diisi', 'warning');
-        return;
-    }
-
-    const statusLabel = status === 'success' ? 'Aktif' : 'Nonaktif';
-
-    if (editingIndex !== null) {
-        // UPDATE baris yang ada
-        const row = document.getElementById(`trainer-row-${editingIndex}`);
-        row.querySelector('.trainer-name').textContent      = name;
-        row.querySelector('.trainer-specialty').textContent = specialty;
-        row.querySelector('.trainer-members').textContent   = `${members} Member`;
-        row.querySelector('.trainer-rating').textContent    = rating;
-        const statusEl = row.querySelector('.trainer-status');
-        statusEl.className = `admin-status admin-status--${status} trainer-status`;
-        statusEl.textContent = statusLabel;
-        row.dataset.name      = name;
-        row.dataset.specialty = specialty;
-        row.dataset.members   = members;
-        row.dataset.rating    = rating;
-        row.dataset.status    = status;
-        showToast(`Data ${name} berhasil diperbarui`, 'success');
-    } else {
-        // TAMBAH baris baru
-        trainerCount++;
-        const newIndex = trainerCount;
-        const newId    = `TR-${String(newIndex).padStart(3,'0')}`;
-        const tr = document.createElement('tr');
-        tr.id = `trainer-row-${newIndex}`;
-        tr.dataset.index     = newIndex;
-        tr.dataset.id        = newId;
-        tr.dataset.name      = name;
-        tr.dataset.specialty = specialty;
-        tr.dataset.members   = members || 0;
-        tr.dataset.rating    = rating || '-';
-        tr.dataset.status    = status;
-        tr.innerHTML = `
-            <td class="admin-table__strong trainer-id">${newId}</td>
-            <td class="trainer-name">${name}</td>
-            <td class="trainer-specialty">${specialty}</td>
-            <td class="trainer-members">${members || 0} Member</td>
-            <td>⭐ <span class="trainer-rating">${rating || '-'}</span></td>
-            <td><span class="admin-status admin-status--${status} trainer-status">${statusLabel}</span></td>
-            <td class="text-right">
-                <button type="button" class="admin-small-button btn-edit" data-index="${newIndex}">Edit</button>
-                <button type="button" class="admin-small-button btn-hapus" style="color:#ff4757;border-color:rgba(255,71,87,0.3);margin-left:0.5rem;" data-index="${newIndex}" data-name="${name}">Hapus</button>
-            </td>`;
-        document.getElementById('trainerBody').appendChild(tr);
-        bindRowButtons(tr);
-        showToast(`${name} berhasil ditambahkan`, 'success');
-    }
-
-    closeModal();
-});
-
-function bindRowButtons(row) {
-    row.querySelector('.btn-edit')?.addEventListener('click', function() {
+document.querySelectorAll('.btn-edit').forEach(btn => {
+    btn.addEventListener('click', function() {
         openModal('edit', this.dataset.index);
     });
-    row.querySelector('.btn-hapus')?.addEventListener('click', function() {
-        const index = this.dataset.index;
-        const name  = this.dataset.name;
-        document.getElementById(`trainer-row-${index}`)?.remove();
-        showToast(`${name} berhasil dihapus`, 'danger');
-    });
-}
+});
 
-// Bind tombol baris awal
-document.querySelectorAll('#trainerBody tr').forEach(row => bindRowButtons(row));
-
-// Tambah Pelatih
 document.getElementById('btnTambahPelatih').addEventListener('click', () => openModal('add'));
 document.getElementById('modalClose').addEventListener('click', closeModal);
 document.getElementById('modalCancel').addEventListener('click', closeModal);

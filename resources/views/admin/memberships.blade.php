@@ -72,7 +72,7 @@
                         <p>Daftar calon member yang mendaftar melalui landing page dan menunggu persetujuan.</p>
                     </div>
                     <span class="admin-pill admin-pill--warning" id="pendingCount">
-                        {{ collect($prospectiveMembers)->where('statusClass','warning')->count() }} Pending
+                        {{ $subscriptions->where('status','pending')->count() }} Pending
                     </span>
                 </div>
                 <div class="admin-table-wrap">
@@ -89,30 +89,31 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($prospectiveMembers as $member)
+                            @foreach ($subscriptions as $subscription)
                             <tr id="member-row-{{ $loop->index }}">
-                                <td class="admin-table__strong">{{ $member['id'] }}</td>
-                                <td>{{ $member['name'] }}</td>
+                                <td class="admin-table__strong">{{ $subscription->id }}</td>
+                                <td>{{ $subscription->user->name ?? 'User' }}</td>
                                 <td>
-                                    <div>{{ $member['email'] }}</div>
-                                    <small style="color:#888;">{{ $member['phone'] }}</small>
+                                    <div>{{ $subscription->user->email ?? '-' }}</div>
+                                    <small style="color:#888;">{{ $subscription->user->phone ?? '-' }}</small>
                                 </td>
-                                <td>{{ $member['plan'] }}</td>
-                                <td>{{ $member['date'] }}</td>
+                                <td>{{ $subscription->membershipPlan->name ?? '-' }}</td>
+                                <td>{{ $subscription->created_at->format('d M Y') }}</td>
                                 <td>
-                                    <span class="admin-status admin-status--{{ $member['statusClass'] }}" id="member-status-{{ $loop->index }}">
-                                        {{ $member['status'] }}
+                                    <span class="admin-status admin-status--{{ $subscription->status == 'pending' ? 'warning' : ($subscription->status == 'active' ? 'success' : 'danger') }}" id="member-status-{{ $loop->index }}">
+                                        {{ ucfirst($subscription->status) }}
                                     </span>
                                 </td>
                                 <td class="text-right">
-                                    @if($member['statusClass'] == 'warning')
-                                    <button type="button"
-                                        class="admin-primary-button btn-approve"
-                                        style="padding:0.4rem 0.8rem;font-size:0.75rem;"
-                                        data-index="{{ $loop->index }}"
-                                        data-name="{{ $member['name'] }}">
-                                        Approve
-                                    </button>
+                                    @if($subscription->status == 'pending')
+                                    <form action="{{ route('admin.subscriptions.approve', $subscription->id) }}" method="POST" style="display:inline;">
+                                        @csrf
+                                        <button type="submit"
+                                            class="admin-primary-button btn-approve"
+                                            style="padding:0.4rem 0.8rem;font-size:0.75rem;">
+                                            Approve
+                                        </button>
+                                    </form>
                                     @else
                                     <button type="button" class="admin-small-button">Lihat</button>
                                     @endif
@@ -146,33 +147,10 @@ function showToast(message, type = 'success') {
     setTimeout(() => { toast.style.animation = 'slideOut 0.3s ease forwards'; setTimeout(() => toast.remove(), 300); }, 3000);
 }
 
-// ── Approve
-document.querySelectorAll('.btn-approve').forEach(btn => {
-    btn.addEventListener('click', function() {
-        const index = this.dataset.index;
-        const name  = this.dataset.name;
-
-        // Update UI
-        const statusEl = document.getElementById(`member-status-${index}`);
-        statusEl.className = 'admin-status admin-status--success';
-        statusEl.textContent = 'Approved';
-
-        // Ganti tombol
-        this.outerHTML = `<button type="button" class="admin-small-button">Lihat</button>`;
-
-        // Update counter
-        const counter = document.getElementById('pendingCount');
-        const current = parseInt(counter.textContent) || 0;
-        if (current > 1) {
-            counter.textContent = `${current - 1} Pending`;
-        } else {
-            counter.className = 'admin-pill admin-pill--success';
-            counter.textContent = 'Semua Approved';
-        }
-
-        showToast(`${name} berhasil diapprove`, 'success');
-    });
-});
+// ── Session Flash Messages
+@if(session('success'))
+    showToast("{{ session('success') }}", 'success');
+@endif
 
 // ── Search
 document.getElementById('searchInput')?.addEventListener('input', function() {

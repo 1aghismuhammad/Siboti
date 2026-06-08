@@ -93,30 +93,48 @@
     <div class="auth-card__right">
         <p class="auth-card__form-title">Buat akun baru</p>
 
-        <form class="auth-form" action="#" method="POST">
+        <form class="auth-form" action="{{ route('register') }}" method="POST">
+            @if ($errors->any())
+                <div style="background-color: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; color: #ef4444; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem; font-size: 0.875rem;">
+                    <strong>Registrasi Gagal:</strong>
+                    <ul style="margin-top: 0.25rem; margin-left: 1rem; list-style-type: disc;">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
             @csrf
             <div class="auth-form__group">
-                <label class="auth-form__label">Nama Lengkap</label>
-                <input type="text" class="auth-form__input" placeholder="Nama kamu">
+                <label class="auth-form__label" for="name">Nama Lengkap</label>
+                <input id="name" type="text" name="name" class="auth-form__input" placeholder="Nama kamu" value="{{ old('name') }}" required autofocus>
+                @error('name')
+                    <span style="color: red; font-size: 0.8rem;">{{ $message }}</span>
+                @enderror
             </div>
             <div class="auth-form__group">
-                <label class="auth-form__label">Email</label>
-                <input type="email" class="auth-form__input" placeholder="email@example.com">
+                <label class="auth-form__label" for="email">Email</label>
+                <input id="email" type="email" name="email" class="auth-form__input" placeholder="email@example.com" value="{{ old('email') }}" required>
+                @error('email')
+                    <span style="color: red; font-size: 0.8rem;">{{ $message }}</span>
+                @enderror
             </div>
             <div class="auth-form__group">
-                <label class="auth-form__label">Nomor HP</label>
-                <input type="tel" class="auth-form__input" placeholder="08xxxxxxxxxx">
+                <label class="auth-form__label" for="password">Password</label>
+                <input id="password" type="password" name="password" class="auth-form__input" placeholder="••••••••" required>
+                @error('password')
+                    <span style="color: red; font-size: 0.8rem;">{{ $message }}</span>
+                @enderror
             </div>
             <div class="auth-form__group">
-                <label class="auth-form__label">Password</label>
-                <input type="password" class="auth-form__input" placeholder="••••••••">
-            </div>
-            <div class="auth-form__group">
-                <label class="auth-form__label">Konfirmasi Password</label>
-                <input type="password" class="auth-form__input" placeholder="••••••••">
+                <label class="auth-form__label" for="password_confirmation">Konfirmasi Password</label>
+                <input id="password_confirmation" type="password" name="password_confirmation" class="auth-form__input" placeholder="••••••••" required>
+                @error('password_confirmation')
+                    <span style="color: red; font-size: 0.8rem;">{{ $message }}</span>
+                @enderror
             </div>
             <label class="auth-form__check" style="font-size:0.7rem;">
-                <input type="checkbox">
+                <input type="checkbox" required>
                 Saya menyetujui syarat & ketentuan serta kebijakan privasi Siboti Gym.
             </label>
             <button type="submit" class="auth-btn-primary">CREATE ACCOUNT</button>
