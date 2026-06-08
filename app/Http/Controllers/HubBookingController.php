@@ -86,11 +86,18 @@ class HubBookingController extends Controller
             $text = urlencode("Halo Admin Siboti, saya " . auth()->user()->name . " ingin membooking PT " . $trainer->name . " pada tanggal " . $validated['booking_date'] . " jam " . $validated['booking_time'] . " secara direct (tanpa paket membership). Mohon konfirmasi pembayaran.");
             $waUrl = "https://wa.me/{$phone}?text={$text}";
             
-            return back()->with('success', 'Data sudah dikirim ke admin.')
-                         ->with('direct_wa_url', $waUrl);
-        }
+            return back()->with('success', 'Data sudah dikirim ke admin. Mohon konfirmasi pembayaran.')
+                         ->with('direct_wa_url', $waUrl)
+                         ->with('wa_target', 'Admin');
+        } else {
+            $phone = '6289876543210';
+            $text = urlencode("Halo PT " . $trainer->name . ", saya " . auth()->user()->name . " (Member Aktif) ingin membooking sesi latihan pada tanggal " . $validated['booking_date'] . " jam " . $validated['booking_time'] . ". Mohon konfirmasi jadwal.");
+            $waUrl = "https://wa.me/{$phone}?text={$text}";
 
-        return back()->with('success', 'Booking berhasil dibuat. Tunggu konfirmasi dari trainer.');
+            return back()->with('success', 'Booking berhasil dibuat. Tunggu konfirmasi dari trainer.')
+                         ->with('direct_wa_url', $waUrl)
+                         ->with('wa_target', 'Trainer');
+        }
     }
 
     public function destroy(Booking $booking)

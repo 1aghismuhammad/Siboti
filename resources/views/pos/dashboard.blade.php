@@ -81,18 +81,7 @@
                     </div>
 
                     <div class="admin-transaction-list" id="productList">
-                        @php
-                        $products = [
-                            ['id' => 1, 'name' => 'Protein Shake',   'icon' => 'local_drink',      'stock' => 18, 'price' => 25000],
-                            ['id' => 2, 'name' => 'Energy Drink',    'icon' => 'bolt',             'stock' => 12, 'price' => 15000],
-                            ['id' => 3, 'name' => 'Whey Protein',    'icon' => 'fitness_center',   'stock' => 8,  'price' => 75000],
-                            ['id' => 4, 'name' => 'BCAA Drink',      'icon' => 'water_drop',       'stock' => 20, 'price' => 30000],
-                            ['id' => 5, 'name' => 'Vitamin C',       'icon' => 'medication',       'stock' => 35, 'price' => 10000],
-                            ['id' => 6, 'name' => 'Air Mineral',     'icon' => 'opacity',          'stock' => 50, 'price' => 5000],
-                            ['id' => 7, 'name' => 'Pre-Workout',     'icon' => 'electric_bolt',    'stock' => 6,  'price' => 50000],
-                            ['id' => 8, 'name' => 'Creatine Shot',   'icon' => 'science',          'stock' => 10, 'price' => 40000],
-                        ];
-                        @endphp
+
 
                         @foreach($products as $product)
                         <div class="admin-transaction pos-product-row"
@@ -258,11 +247,45 @@ document.getElementById('clearCart').addEventListener('click', () => {
     renderCart();
 });
 
-document.getElementById('saveBtn').addEventListener('click', () => {
-    const total = document.getElementById('cartTotal').textContent;
-    document.getElementById('modalTotal').textContent = total;
-    const modal = document.getElementById('successModal');
-    modal.style.display = 'flex';
+document.getElementById('saveBtn').addEventListener('click', async () => {
+    let totalValue = 0;
+    let itemsCount = 0;
+    Object.keys(cart).forEach(id => {
+        const qty = cart[id];
+        totalValue += products[id].price * qty;
+        itemsCount += qty;
+    });
+
+    const saveBtn = document.getElementById('saveBtn');
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Menyimpan...';
+
+    try {
+        const res = await fetch('{{ route("pos.transaction.store") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                total: totalValue,
+                items_count: itemsCount
+            })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+            document.getElementById('modalTotal').textContent = document.getElementById('cartTotal').textContent;
+            document.getElementById('successModal').style.display = 'flex';
+        } else {
+            alert('Gagal menyimpan transaksi.');
+        }
+    } catch (e) {
+        alert('Terjadi kesalahan saat menyimpan transaksi.');
+    } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Simpan Transaksi';
+    }
 });
 
 document.getElementById('modalClose').addEventListener('click', () => {

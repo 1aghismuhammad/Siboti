@@ -176,7 +176,7 @@
                         <p>Log validasi member pada shift receptionist hari ini</p>
                     </div>
                     <span class="admin-pill admin-pill--positive" id="checkinCount">
-                        {{ count($todayCheckins) }} check-in
+                        {{ count($recentScans) }} check-in
                     </span>
                 </div>
                 <div class="admin-table-wrap">
@@ -191,7 +191,7 @@
                             </tr>
                         </thead>
                         <tbody id="checkinBody">
-                            @forelse($todayCheckins as $c)
+                            @forelse($recentScans as $c)
                             <tr>
                                 <td class="admin-table__strong">{{ $c['name'] }}</td>
                                 <td>{{ $c['memberId'] }}</td>
@@ -250,7 +250,7 @@ const csrfToken = '{{ csrf_token() }}';
 let currentMember = null;
 let cameraStream   = null;
 let scanInterval   = null;
-let checkinCount   = {{ count($todayCheckins) }};
+let checkinCount   = {{ count($recentScans) }};
 
 // ── Elemen
 const memberCode        = document.getElementById('memberCode');

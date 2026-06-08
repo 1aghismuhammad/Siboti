@@ -9,7 +9,7 @@ use App\Models\Subscription;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Validation\Rule;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class PersonalTrainerDashboardController extends Controller

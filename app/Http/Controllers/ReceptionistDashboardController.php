@@ -56,31 +56,6 @@ class ReceptionistDashboardController extends Controller
             ],
         ];
 
-        $members = Subscription::with('user', 'membershipPlan')
-            ->latest('end_date')
-            ->limit(3)
-            ->get()
-            ->mapWithKeys(function (Subscription $subscription) {
-                $user = $subscription->user;
-                $isActive = $subscription->status === 'active' && $subscription->end_date->isFuture();
-
-                return [
-                    sprintf('MEM-%04d', $user?->id ?? 0) => [
-                        'name' => $user?->name ?? 'Guest',
-                        'memberId' => sprintf('MEM-%04d', $user?->id ?? 0),
-                        'package' => $subscription->membershipPlan?->name ?? 'Membership',
-                        'remaining' => $isActive ? Carbon::today()->diffInDays($subscription->end_date) . ' Hari' : '0 Hari',
-                        'status' => $isActive ? 'AKTIF' : 'EXPIRED',
-                        'statusClass' => $isActive ? 'success' : 'danger',
-                        'note' => $isActive
-                            ? 'Member valid. Silakan konfirmasi check-in.'
-                            : 'Membership sudah berakhir. Arahkan ke proses perpanjangan.',
-                        'initials' => $this->getInitials($user?->name ?? 'GM'),
-                    ],
-                ];
-            })
-            ->toArray();
-
         $checkIns = Checkin::with('user')
             ->latest('checkin_time')
             ->limit(3)
@@ -141,7 +116,7 @@ class ReceptionistDashboardController extends Controller
             ],
         ];
 
-        return view('receptionist.dashboard', compact('stats', 'members', 'checkIns', 'posTransactions', 'activities', 'alerts'));
+        return view('receptionist.dashboard', compact('stats', 'checkIns', 'posTransactions', 'activities', 'alerts'));
     }
 
     private function getInitials(string $name): string

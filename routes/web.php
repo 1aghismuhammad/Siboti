@@ -127,6 +127,10 @@ Route::get('/pos/dashboard', PosDashboardController::class)
     ->middleware(['auth', EnsureUserRole::class . ':receptionist'])
     ->name('pos.dashboard');
 
+Route::post('/pos/transaction', [PosDashboardController::class, 'store'])
+    ->middleware(['auth', EnsureUserRole::class . ':receptionist'])
+    ->name('pos.transaction.store');
+
 Route::get('/pos/history', PosHistoryController::class)
     ->middleware('auth')
     ->name('pos.history');

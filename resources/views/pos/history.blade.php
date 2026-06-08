@@ -90,18 +90,18 @@
                             </tr>
                         </thead>
                         <tbody>
+                            @forelse($transactions as $t)
                             <tr>
-                                <td>12 Jun 2026</td>
-                                <td>Protein Shake x2</td>
-                                <td class="admin-table__strong">Rp50.000</td>
-                                <td>Admin</td>
+                                <td>{{ $t['time'] }}</td>
+                                <td>{{ $t['items_count'] }} item</td>
+                                <td class="admin-table__strong">{{ $t['total'] }}</td>
+                                <td>{{ $t['cashier'] }}</td>
                             </tr>
+                            @empty
                             <tr>
-                                <td>12 Jun 2026</td>
-                                <td>Energy Drink x1</td>
-                                <td class="admin-table__strong">Rp15.000</td>
-                                <td>Admin</td>
+                                <td colspan="4" style="text-align: center; color: #888;">Belum ada riwayat transaksi.</td>
                             </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>

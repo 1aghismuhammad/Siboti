@@ -95,6 +95,7 @@ class ScanQrPageController extends Controller
                     'time' => $checkin->checkin_time->format('H.i'),
                     'name' => $checkin->user?->name ?? 'Guest',
                     'memberId' => sprintf('MEM-%04d', $checkin->user?->id ?? 0),
+                    'package' => $checkin->user?->subscriptions()->where('status', 'active')->latest('end_date')->first()?->membershipPlan?->name ?? 'Membership',
                     'method' => 'QR Scanner',
                     'gate' => 'Front Desk',
                     'status' => 'Berhasil',

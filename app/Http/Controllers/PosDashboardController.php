@@ -170,4 +170,32 @@ class PosDashboardController extends Controller
     {
         return collect(explode(' ', $name))->map(fn ($part) => strtoupper(substr($part, 0, 1)))->join('');
     }
+
+    public function store(\Illuminate\Http\Request $request)
+    {
+        $this->authorizeRole('receptionist');
+
+        $request->validate([
+            'total' => 'required|numeric|min:0',
+            'items_count' => 'required|integer|min:1',
+        ]);
+
+        $transaction = PosTransaction::create([
+            'transaction_id' => 'TRX-' . strtoupper(uniqid()),
+            'cashier' => auth()->user()->name ?? 'Receptionist',
+            'user_id' => null,
+            'member_name' => 'Guest', // Since the frontend doesn't select a member yet
+            'total' => $request->total,
+            'items_count' => $request->items_count,
+            'status' => 'Paid',
+            'status_class' => 'success',
+            'transacted_at' => Carbon::now(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Transaksi berhasil disimpan',
+            'transaction' => $transaction
+        ]);
+    }
 }
