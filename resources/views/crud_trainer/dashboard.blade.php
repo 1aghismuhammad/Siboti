@@ -550,7 +550,6 @@
                                 <th>Tinggi Badan</th>
                                 <th>Otot / Lemak</th>
                                 <th>Catatan Trainer</th>
-                                <th>Aksi</th>
                             </tr>
                         </thead>
                         <tbody id="progress-tbody">
@@ -562,16 +561,10 @@
                                 <td>{{ $r['height'] }}</td>
                                 <td>{{ $r['muscle_mass'] }} / {{ $r['fat_percentage'] }}</td>
                                 <td style="max-width:200px; color:rgba(255,255,255,0.5); font-size:0.75rem; line-height:1.4;">{{ $r['notes'] }}</td>
-                                <td>
-                                    <div style="display:flex;">
-                                        <button class="trainer-table__action" title="Edit" onclick="bukaModalEdit(this)">✏️</button>
-                                        <button class="trainer-table__action trainer-table__action--delete" title="Hapus" onclick="hapusRow(this)">🗑</button>
-                                    </div>
-                                </td>
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="7" style="text-align:center; padding: 2rem; color: rgba(255,255,255,0.4);">Belum ada riwayat progress dicatat.</td>
+                                <td colspan="6" style="text-align:center; padding: 2rem; color: rgba(255,255,255,0.4);">Belum ada riwayat progress dicatat.</td>
                             </tr>
                             @endforelse
                         </tbody>
@@ -703,41 +696,41 @@
             <p class="modal-box__title" id="modal-title">Catat Progress Baru</p>
             <button class="modal-box__close" onclick="tutupModal()">✕</button>
         </div>
-        <form id="progress-form" onsubmit="submitProgress(event)">
-            <input type="hidden" id="edit-index" value="">
+        <form action="{{ route('trainer.progress.store') }}" method="POST">
+            @csrf
             
             <div class="form-group">
-                <label class="form-label">Tanggal Latihan</label>
-                <input type="date" class="form-control" id="f-tanggal" value="{{ date('Y-m-d') }}" required>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">Nama Latihan Utama (Fokus Sesi)</label>
-                <input type="text" class="form-control" id="f-latihan" placeholder="Contoh: Barbell Deadlift" required>
+                <label class="form-label">Pilih Member</label>
+                <select name="user_id" class="form-control" required>
+                    <option value="">-- Pilih Member --</option>
+                    @foreach($clients as $c)
+                        <option value="{{ $c['user_id'] }}">{{ $c['name'] }}</option>
+                    @endforeach
+                </select>
             </div>
             
             <div class="form-grid">
                 <div class="form-group">
-                    <label class="form-label">Beban Max (KG)</label>
-                    <input type="number" class="form-control" id="f-beban" placeholder="0" required>
+                    <label class="form-label">Berat Badan (KG)</label>
+                    <input type="number" step="0.1" name="weight" class="form-control" placeholder="0" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Durasi Sesi (Menit)</label>
-                    <input type="number" class="form-control" id="f-durasi" placeholder="60" required>
+                    <label class="form-label">Tinggi Badan (CM)</label>
+                    <input type="number" step="0.1" name="height" class="form-control" placeholder="0" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Jumlah Set</label>
-                    <input type="number" class="form-control" id="f-set" placeholder="4" required>
+                    <label class="form-label">Massa Otot (%)</label>
+                    <input type="number" step="0.1" name="muscle_mass" class="form-control" placeholder="0" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Repetisi</label>
-                    <input type="number" class="form-control" id="f-rep" placeholder="8-12" required>
+                    <label class="form-label">Lemak Tubuh (%)</label>
+                    <input type="number" step="0.1" name="fat_percentage" class="form-control" placeholder="0" required>
                 </div>
             </div>
             
             <div class="form-group">
-                <label class="form-label">Catatan Evaluasi Trainer</label>
-                <textarea class="form-control" id="f-catatan" placeholder="Catat postur, keluhan member, atau target peningkatan beban minggu depan..."></textarea>
+                <label class="form-label">Catatan Trainer</label>
+                <textarea name="notes" class="form-control" placeholder="Catat progress..."></textarea>
             </div>
             
             <div class="form-actions">

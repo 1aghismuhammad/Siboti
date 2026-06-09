@@ -279,6 +279,31 @@ class PersonalTrainerDashboardController extends Controller
 
         return back()->with('success', 'Member berhasil dihapus dari daftar Anda.');
     }
+    public function storeProgress(Request $request)
+    {
+        $this->authorizeRole('trainer');
+
+        $validated = $request->validate([
+            'user_id' => ['required', 'exists:users,id'],
+            'weight' => ['required', 'numeric'],
+            'height' => ['required', 'numeric'],
+            'muscle_mass' => ['required', 'numeric'],
+            'fat_percentage' => ['required', 'numeric'],
+            'notes' => ['nullable', 'string'],
+        ]);
+
+        ProgressRecord::create([
+            'user_id' => $validated['user_id'],
+            'weight' => $validated['weight'],
+            'height' => $validated['height'],
+            'muscle_mass' => $validated['muscle_mass'],
+            'fat_percentage' => $validated['fat_percentage'],
+            'notes' => $validated['notes'],
+        ]);
+
+        return back()->with('success', 'Progress member berhasil disimpan.');
+    }
+
     private function getStatusClass(string $status): string
     {
         return match ($status) {

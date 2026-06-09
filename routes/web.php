@@ -120,6 +120,10 @@ Route::delete('/trainer/members/{user_id}', [PersonalTrainerDashboardController:
     ->middleware(['auth', EnsureUserRole::class . ':trainer'])
     ->name('trainer.member.remove');
 
+Route::post('/trainer/progress', [PersonalTrainerDashboardController::class, 'storeProgress'])
+    ->middleware(['auth', EnsureUserRole::class . ':trainer'])
+    ->name('trainer.progress.store');
+
 Route::get('/receptionist/dashboard', ReceptionistDashboardController::class)
     ->middleware(['auth', EnsureUserRole::class . ':receptionist'])
     ->name('receptionist.dashboard');
@@ -139,6 +143,10 @@ Route::post('/pos/transaction', [PosDashboardController::class, 'store'])
 Route::post('/pos/products', [PosDashboardController::class, 'storeProduct'])
     ->middleware(['auth', EnsureUserRole::class . ':receptionist'])
     ->name('pos.product.store');
+
+Route::delete('/pos/products/{id}', [PosDashboardController::class, 'destroyProduct'])
+    ->middleware(['auth', EnsureUserRole::class . ':receptionist'])
+    ->name('pos.product.destroy');
 
 Route::get('/pos/history', PosHistoryController::class)
     ->middleware('auth')

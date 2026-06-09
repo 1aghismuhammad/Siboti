@@ -1152,6 +1152,8 @@ document.addEventListener('DOMContentLoaded', function() {
     @elseif(session('success'))
         // Tampilkan popup sukses biasa
         document.getElementById('sukses-detail').textContent = "{{ session('success') }}";
+        document.getElementById('sukses-next-desc').textContent = "Mohon tunggu konfirmasi dari sistem/admin.";
+        document.getElementById('wa-btn').style.display = "none";
         document.getElementById('popup-sukses').classList.add('is-open');
         document.body.classList.add('popup-open');
     @endif

@@ -178,6 +178,7 @@ class PosDashboardController extends Controller
         $request->validate([
             'total' => 'required|numeric|min:0',
             'items_count' => 'required|integer|min:1',
+            'cart' => 'required|array',
         ]);
 
         $transaction = PosTransaction::create([
@@ -191,6 +192,14 @@ class PosDashboardController extends Controller
             'status_class' => 'success',
             'transacted_at' => Carbon::now(),
         ]);
+
+        foreach ($request->cart as $code => $qty) {
+            $product = Product::where('code', $code)->first();
+            if ($product) {
+                $product->decrement('stock', $qty);
+                $product->increment('sales_count', $qty);
+            }
+        }
 
         return response()->json([
             'success' => true,
@@ -226,5 +235,15 @@ class PosDashboardController extends Controller
         ]);
 
         return redirect()->route('pos.dashboard')->with('success', 'Produk berhasil ditambahkan.');
+    }
+
+    public function destroyProduct($id)
+    {
+        $this->authorizeRole('receptionist');
+
+        $product = Product::where('code', $id)->firstOrFail();
+        $product->delete();
+
+        return redirect()->route('pos.dashboard')->with('success', 'Produk berhasil dihapus.');
     }
 }

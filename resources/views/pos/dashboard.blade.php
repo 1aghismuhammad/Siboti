@@ -106,6 +106,13 @@
                                 <button type="button" class="admin-small-button pos-add-btn" data-id="{{ $product['id'] }}">
                                     <span class="material-symbols-outlined" style="font-size:16px;">add</span>
                                 </button>
+                                <form action="{{ route('pos.product.destroy', $product['id']) }}" method="POST" style="margin:0;" onsubmit="return confirm('Hapus produk ini?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="admin-small-button" style="background:rgba(255,80,80,0.1); color:#ff5050; border-color:rgba(255,80,80,0.2);">
+                                        <span class="material-symbols-outlined" style="font-size:16px;">delete</span>
+                                    </button>
+                                </form>
                             </div>
                         </div>
                         @endforeach
@@ -315,7 +322,8 @@ document.getElementById('saveBtn').addEventListener('click', async () => {
             },
             body: JSON.stringify({
                 total: totalValue,
-                items_count: itemsCount
+                items_count: itemsCount,
+                cart: cart
             })
         });
 
